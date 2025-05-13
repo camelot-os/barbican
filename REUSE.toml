@@ -3,12 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 version = 1
-SPDX-PackageName = "outpost-barbican"
-SPDX-PackageSupplier = "Ledger SAS <outpost-os@ledger.fr>"
-SPDX-PackageDownloadLocation = "https://github.com/outpost-os/barbican"
+SPDX-PackageName = "camelot-barbican"
+SPDX-PackageSupplier = "H2Lab"
+SPDX-PackageDownloadLocation = "https://github.com/camelot-os/barbican"
 
 [[annotations]]
 path = "doc/**"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2024 Ledger SAS"
+SPDX-FileCopyrightText = "2025 H2Lab"
 SPDX-License-Identifier = "Apache-2.0"

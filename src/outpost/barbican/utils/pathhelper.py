@@ -24,7 +24,7 @@ class DirName(StrEnum):
     Include = auto()
     Lib = auto()
     Man = auto()
-    Outpost_Private = auto()
+    Camelot_Private = auto()
     PkgConfig = auto()
     Share = auto()
     Src = auto()
@@ -101,7 +101,7 @@ class ProjectPath:
     def load(cls, build_dir: Path) -> "ProjectPath":
         """Load project path for a given builddir from json."""
         try:
-            file = (build_dir / DirName.Outpost_Private.value / cls.filename).resolve(strict=True)
+            file = (build_dir / DirName.Camelot_Private.value / cls.filename).resolve(strict=True)
         except FileNotFoundError:
             # XXX: dedicated error
             console.critical(f"{cls.filename} not found, please try to re run [i]setup[/i] command")
@@ -174,7 +174,7 @@ class ProjectPath:
     @property
     @lru_cache
     def private_build_dir(self) -> Path:
-        return self.build_dir / DirName.Outpost_Private.value
+        return self.build_dir / DirName.Camelot_Private.value
 
     @property
     @lru_cache

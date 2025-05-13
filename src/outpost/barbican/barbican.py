@@ -95,7 +95,7 @@ class Project:
 
         logger.info("Create Cargo local repository")
         registry = cargo.LocalRegistry(
-            self.path.sysroot_data_dir / "cargo" / "registry" / "outpost_sdk"
+            self.path.sysroot_data_dir / "cargo" / "registry" / "camelot_sdk"
         )
         cargo_config = cargo.Config(self.path.output_dir, registry)
         registry.init()
@@ -333,7 +333,7 @@ def run_internal_command(cmd: str, argv: T.List[str]) -> None:
     """
     import importlib
 
-    module = importlib.import_module("outpost.barbican._internals." + cmd)
+    module = importlib.import_module("camelot.barbican._internals." + cmd)
     module.run(argv)
 
 

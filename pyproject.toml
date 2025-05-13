@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2023 - 2024 Ledger SAS
+# SPDX-FileCopyrightText: 2025 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -7,13 +8,14 @@ requires = ["setuptools>=64", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "outpost-barbican"
-description = "Outpost-OS build system"
+name = "camelot-barbican"
+description = "Camelot-OS build system"
 dynamic = ["version"]
 requires-python = ">= 3.10"
 readme = "README.md"
 authors = [
-  {email = "Ledger SAS <outpost-os@ledger.fr>"},
+  {name = "Florent Valette},
+  {name = "Philippe Thierry"},
 ]
 license = {file = "LICENSES/Apache-2.0.txt"}
 dependencies = [
@@ -22,7 +24,7 @@ dependencies = [
     "jsonschema>=4.18.0",
     "kconfiglib>=14.1.0",
     "lief>=0.13,<0.15",
-    "meson>=1.4.0,<1.5.0",
+    "meson>=1.7.0",
     "ninja>=1.11.0",
     "ninja_syntax>1.7",
     "svd2json>=0.1.6",
@@ -49,13 +51,13 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/outpost-os"
+Homepage = "https://github.com/camelot-os"
 # Documentation = TODO
-Repository = "https://github.com/outpost-os/barbican"
-Issues = "https://github.com/outpost-os/barbican/issues"
+Repository = "https://github.com/camelot-os/barbican"
+Issues = "https://github.com/camelot-os/barbican/issues"
 
 [project.scripts]
-barbican = "outpost.barbican.barbican:main"
+barbican = "camelot.barbican.barbican:main"
 
 [project.optional-dependencies]
 devel = [

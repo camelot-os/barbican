@@ -11,8 +11,8 @@ from string import ascii_letters
 from git import Repo
 from git.exc import GitCommandError
 
-from outpost.barbican.scm import scm_create
-from outpost.barbican.scm.git import Git
+from camelot.barbican.scm import scm_create
+from camelot.barbican.scm.git import Git
 
 
 class GitTestBase:

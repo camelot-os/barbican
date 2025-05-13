@@ -14,7 +14,7 @@ For use as Integration Kit, `tools` extra dependencies must be installed.
 
 .. code-block:: console
 
-    pip install [--user] outpost-barbican[tools]
+    pip install [--user] camelot-barbican[tools]
 
 .. seealso::
 
