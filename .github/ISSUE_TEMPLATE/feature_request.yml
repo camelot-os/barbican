@@ -9,7 +9,7 @@ projects: ["camelot-os/1"]
 assignees:
   - fvalette
   - PThierry
-labels: ["bug"]
+labels: ["feature"]
 
 body:
   - type: markdown
