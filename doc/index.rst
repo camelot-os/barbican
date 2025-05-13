@@ -28,6 +28,6 @@ Welcome to barbican documentation!
    :align: center
    :width: 30%
 
-.. image:: _static/figures/outpost.png
+.. image:: _static/figures/camelot.png
    :align: right
    :width: 5%

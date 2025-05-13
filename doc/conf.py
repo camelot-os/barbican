@@ -1,7 +1,7 @@
 from importlib import metadata
 
 # General information about the project.
-project = "outpost.barbican"
+project = "camelot.barbican"
 copyright = "2024, Ledger SAS"
 author = "Ledger"
 
@@ -34,7 +34,7 @@ napoleon_include_private_with_doc = True
 napoleon_attr_annotations = True
 
 # Autoapi configuration
-autoapi_dirs = ["../src/outpost"]
+autoapi_dirs = ["../src/camelot"]
 autoapi_add_toctree_entry = False
 autoapi_python_use_implicit_namespaces = True
 
@@ -72,8 +72,8 @@ simplepdf_vars = {
     "cover": "#ffffff",
     "white": "#ffffff",
     "links": "#6299C4",
-    # "cover-bg": "url(figures/outpost_fp.png) no-repeat center",
+    # "cover-bg": "url(figures/camelot_fp.png) no-repeat center",
     "cover-overlay": "rgba(62, 99, 196, 0.5)",
     "top-left-content": "counter(page)",
-    "bottom-center-content": "Outpost documentation suite: Barbican meta tool",
+    "bottom-center-content": "Camelot documentation suite: Barbican meta tool",
 }

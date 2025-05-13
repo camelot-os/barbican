@@ -1,12 +1,13 @@
 <!--
 SPDX-FileCopyrightText: 2024 - 2025 Ledger SAS
+SPDX-FileCopyrightText: 2025 H2Lab
 
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Outpost Barbican
+# Camelot Barbican
 
-Barbican is the Outpost OS meta tools for building project, SDK and integration,
+Barbican is the Camelot OS meta tools for building project, SDK and integration,
 written in python.
 
 ## Dependencies
@@ -45,17 +46,17 @@ crossfile = 'cm33-none-eabi-gcc.ini'
 version = 'v0.0.1'
 
 [kernel]
-scm.git.uri = 'https://github.com/outpost-os/sentry-kernel.git'
+scm.git.uri = 'https://github.com/camelot-os/sentry-kernel.git'
 scm.git.revision = 'main'
 config = 'configs/sentry/nucleo_u5a5.config'
 
 [runtime]
-scm.git.uri = 'git@github.com:outpost-os/shield.git'
+scm.git.uri = 'git@github.com:camelot-os/shield.git'
 scm.git.revision = 'main'
 config = 'configs/shield/shield.config'
 
 [application.hello]
-scm.git.uri = 'https://github.com/outpost-os/sample-rust-app.git'
+scm.git.uri = 'https://github.com/camelot-os/sample-rust-app.git'
 scm.git.revision = 'main'
 config = 'configs/hello/hello.config'
 build.backend = 'cargo'

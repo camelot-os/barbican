@@ -40,9 +40,9 @@ class Elf:
         self._elf.write(self._output_path)  # type: ignore
 
     @property
-    def is_an_outpost_application(self) -> bool:
+    def is_an_camelot_application(self) -> bool:
         if self._package_metadata is not None:
-            return self._package_metadata["type"] == "outpost application"
+            return self._package_metadata["type"] == "camelot application"
         return False
 
     def get_section_info(self, section_name: str) -> tuple[int, int]:
@@ -107,7 +107,7 @@ class SentryElf(Elf):
 
 
 class AppElf(Elf):
-    """Outpost application Elf representation.
+    """Camelot application Elf representation.
 
     Attributes
     ----------
@@ -124,7 +124,7 @@ class AppElf(Elf):
     Raises
     ------
     ValueError
-        Package metadata 'type' is not 'outpost application'
+        Package metadata 'type' is not 'camelot application'
     """
 
     # Section to relocate
@@ -133,8 +133,8 @@ class AppElf(Elf):
 
     def __init__(self, elf: str, out: str | None) -> None:
         super().__init__(elf, out)
-        if not self.is_an_outpost_application:
-            console.critical(f"{self.name} is not a valid outpost application")
+        if not self.is_an_camelot_application:
+            console.critical(f"{self.name} is not a valid camelot application")
             raise ValueError
 
         self._prev_sections = dict()

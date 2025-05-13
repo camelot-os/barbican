@@ -19,4 +19,4 @@ jobs:
       packages: read
       actions: read
       contents: read
-    uses: outpost-os/pipeline-python/.github/workflows/codeql.yml@v1
+    uses: camelot-os/pipeline-python/.github/workflows/codeql.yml@v1

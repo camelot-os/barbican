@@ -15,7 +15,7 @@ virtualenv).
 
 .. code-block:: console
 
-    pip install [--user] outpost-barbican
+    pip install [--user] camelot-barbican
 
 .. note::
 
@@ -76,7 +76,7 @@ python linting, type checking, unit testing.
 
 .. code-block:: console
 
-    pip install [--user] outpost-barbican[devel]
+    pip install [--user] camelot-barbican[devel]
 
 doc
 """
@@ -93,12 +93,12 @@ is `numpydoc <https://numpydoc.readthedocs.io/en/latest/index.html>`_
 
 .. code-block:: console
 
-    pip install [--user] outpost-barbican[doc]
+    pip install [--user] camelot-barbican[doc]
 
 tools
 """""
 
-Barbican tools are dependencies that are used by Outpost OS package build system.
+Barbican tools are dependencies that are used by Camelot OS package build system.
 Those are not used directly by Barbican package but required in order to build
 a firmware.
 
@@ -110,7 +110,7 @@ a firmware.
 
 .. code-block:: console
 
-    pip install [--user] outpost-barbican[tools]
+    pip install [--user] camelot-barbican[tools]
 
 .. tip::
 
@@ -118,7 +118,7 @@ a firmware.
 
     .. code-block:: console
 
-        pip install [--user] outpost-barbican[devel,doc,tools]
+        pip install [--user] camelot-barbican[devel,doc,tools]
 
 Development
 -----------

@@ -15,7 +15,7 @@ class Runtime:
     def __init__(self, parent, config: dict) -> None:
         self._package = Meson("runtime", parent, config["runtime"], Package.Type.Runtime)
         self._cargo_manifests = {
-            "outpost_metadata": self._package.src_dir
+            "camelot_metadata": self._package.src_dir
             / "subprojects"
             / "package-metadata"
             / "Cargo.toml",

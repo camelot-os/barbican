@@ -5,10 +5,10 @@
 name: Bug Report
 description: File a bug report.
 title: "bug: "
-projects: ["outpost-os/1"]
+projects: ["camelot-os/1"]
 assignees:
-  - fvalette-ledger
-  - pthierry-ledger
+  - fvalette
+  - PThierry
 labels: ["bug"]
 
 body:
@@ -22,10 +22,10 @@ body:
       label: What happened?
       description: What is the problem or what is asked ?
   - type: textarea
-    id: outpost-barbican
+    id: camelot-barbican
     attributes:
-      label: What outpost-barbican version is impacted
-      description: outpost-barbican version used
+      label: What camelot-barbican version is impacted
+      description: camelot-barbican version used
     validations:
       required: true
   - type: dropdown
