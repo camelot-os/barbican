@@ -14,7 +14,7 @@ dynamic = ["version"]
 requires-python = ">= 3.10"
 readme = "README.md"
 authors = [
-  {name = "Florent Valette},
+  {name = "Florent Valette"},
   {name = "Philippe Thierry"},
 ]
 license = {file = "LICENSES/Apache-2.0.txt"}
