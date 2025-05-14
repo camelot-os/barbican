@@ -17,7 +17,7 @@ written in python.
  - jsonschema >= 4.18.0
  - kconfiglib >= 14.1.0
  - lief >= 0.13,<0.15
- - meson >= 1.4.0,<1.5.0
+ - meson >= 1.7
  - ninja >= 1.11.0
  - ninja_syntax > 1.7
  - svd2json >= 0.1.6
