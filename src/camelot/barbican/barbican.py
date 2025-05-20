@@ -1,14 +1,9 @@
 # SPDX-FileCopyrightText: 2023 - 2024 Ledger SAS
+# SPDX-FileCopyrightText: 2025 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# XXX:
-# tomllib is the standard buildt-in toml library since python 3.11
-# prior to 3.11, use tomli instead (reference implementation that became the standard).
-try:
-    import tomllib  # type: ignore
-except ModuleNotFoundError:
-    import tomli as tomllib
+import tomllib
 
 from argparse import ArgumentParser
 import os
