@@ -11,7 +11,7 @@ build-backend = "setuptools.build_meta"
 name = "camelot-barbican"
 description = "Camelot-OS build system"
 dynamic = ["version"]
-requires-python = ">= 3.10"
+requires-python = ">= 3.11"
 readme = "README.md"
 authors = [
   {name = "Florent Valette"},
@@ -45,7 +45,6 @@ classifiers = [
 
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
@@ -86,7 +85,7 @@ tools = [
 [tool.setuptools_scm]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 
 [[tool.mypy.overrides]]
 module = "tomli"
