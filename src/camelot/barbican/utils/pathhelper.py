@@ -3,13 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from dataclasses import dataclass, field, asdict
-from enum import unique, auto
+from enum import StrEnum, unique, auto
 from functools import lru_cache
 import json
 from pathlib import Path
 from typing import ClassVar
 
-from . import StrEnum
 from ..console import console
 
 

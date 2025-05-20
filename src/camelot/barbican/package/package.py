@@ -7,12 +7,11 @@ import collections.abc
 from pathlib import Path
 
 from functools import lru_cache
-from enum import auto, unique
+from enum import StrEnum, auto, unique
 
 from ..console import console
 from ..logger import logger
 from ..scm import scm_create
-from ..utils import StrEnum
 
 import typing as T
 

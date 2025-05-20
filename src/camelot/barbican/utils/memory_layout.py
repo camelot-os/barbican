@@ -5,12 +5,10 @@
 from dataclasses import dataclass, fields, field, asdict
 from enum import unique, auto, IntFlag
 
-from enum import Enum
+from enum import Enum, StrEnum
 import json
 from pathlib import Path
 import typing as T
-
-from . import StrEnum
 
 
 @dataclass(kw_only=True, frozen=True)
