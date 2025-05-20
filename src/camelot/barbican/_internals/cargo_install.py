@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Ledger SAS
+# SPDX-FileCopyrightText: 2025 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -9,7 +10,6 @@ Add target specific and per apps compile flags in a config.
 
 from argparse import ArgumentParser
 from pathlib import Path
-import typing as T
 
 from .install import run_install, argument_parser as install_argument_parser
 
@@ -32,7 +32,7 @@ def argument_parser() -> ArgumentParser:
     return parser
 
 
-def run(argv: T.List[str]) -> None:
+def run(argv: list[str]) -> None:
     args = argument_parser().parse_args(argv)
     target: str = args.target_file.read_text().splitlines()[0]
     from_dir: Path = (args.from_dir / target / args.profile).resolve(strict=True)

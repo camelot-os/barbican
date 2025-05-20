@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Ledger SAS
+# SPDX-FileCopyrightText: 2025 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -6,7 +7,6 @@ from argparse import ArgumentParser
 import json
 from pathlib import Path
 import subprocess
-import typing as T
 
 from ..utils.environment import find_program
 
@@ -47,7 +47,7 @@ def argument_parser() -> ArgumentParser:
     return parser
 
 
-def run(argv: T.List[str]) -> None:
+def run(argv: list[str]) -> None:
     args = argument_parser().parse_args(argv)
 
     objcopy = None

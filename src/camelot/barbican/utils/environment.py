@@ -19,12 +19,12 @@ def find_program(name: str) -> str: ...
 @T.overload
 def find_program(name: bytes) -> bytes: ...
 @T.overload
-def find_program(name: str, path: T.Optional[Path]) -> str: ...
+def find_program(name: str, path: Path | None) -> str: ...
 @T.overload
-def find_program(name: bytes, path: T.Optional[Path]) -> bytes: ...
+def find_program(name: bytes, path: Path | None) -> bytes: ...
 
 
-def find_program(name: str | bytes, path: T.Optional[Path] = None) -> str | bytes:
+def find_program(name: str | bytes, path: Path | None = None) -> str | bytes:
     if name not in _PROGRAM_CACHE_DICT.keys():
         log = f"Find Program: {name!r}"
         if path:
@@ -60,14 +60,14 @@ class ExeWrapper:
     >>> meson.setup(cross_file="Path/to/crossfile", args=["path/to/builddir"])
     """
 
-    def __init__(self, name: str, path: T.Optional[Path] = None, capture_out: bool = False) -> None:
+    def __init__(self, name: str, path: Path | None = None, capture_out: bool = False) -> None:
         """Initialize a ExeWrapper instance.
 
         Parameters
         ----------
         name: str
             Program name to wrap
-        path: T.Optional[Path]
+        path: Path | None
             Search path for executable, optional.
         capture_out: bool
             Capture stdout as str (system default encoding) if True, False by default.

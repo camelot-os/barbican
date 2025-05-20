@@ -2,11 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-from enum import auto, unique
+from enum import StrEnum, auto, unique
 import collections.abc
 from pathlib import Path
 from .scm import ScmBaseClass
-from ..utils import StrEnum
 
 
 @unique

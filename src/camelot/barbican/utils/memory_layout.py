@@ -5,12 +5,10 @@
 from dataclasses import dataclass, fields, field, asdict
 from enum import unique, auto, IntFlag
 
-from enum import Enum
+from enum import Enum, StrEnum
 import json
 from pathlib import Path
 import typing as T
-
-from . import StrEnum
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -31,7 +29,7 @@ class Region:
     permission: Permission = Permission(0)
     start_address: int
     size: int
-    subregions: T.List["Region"] = field(default_factory=list)
+    subregions: list["Region"] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         for f in fields(self):
@@ -39,7 +37,7 @@ class Region:
             value_type = T.cast(type, f.type)
             if value_type is int and isinstance(value, str):
                 object.__setattr__(self, f.name, int(value, 16))
-            elif value_type is T.List["Region"] and all(isinstance(e, dict) for e in value):
+            elif value_type is list["Region"] and all(isinstance(e, dict) for e in value):
                 object.__setattr__(self, f.name, [Region(**e) for e in value])
             elif issubclass(value_type, Enum):
                 object.__setattr__(self, f.name, value_type(value))
