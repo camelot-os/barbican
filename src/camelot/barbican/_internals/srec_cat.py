@@ -10,14 +10,13 @@ TODO : documentation
 
 from argparse import ArgumentParser
 from pathlib import Path
-import typing as T
 
 import subprocess
 
 from ..utils.environment import find_program
 
 
-_SREC_CAT_FORMAT: T.Dict[str, str] = {
+_SREC_CAT_FORMAT: dict[str, str] = {
     "ihex": "-intel",
 }
 
