@@ -20,7 +20,7 @@ from ..utils import memory_layout as memory
 from ..utils import align_to, pow2_round_up
 
 
-def _get_project_elves(exelist: list[Path]) -> T.Tuple[SentryElf, list[AppElf]]:
+def _get_project_elves(exelist: list[Path]) -> tuple[SentryElf, list[AppElf]]:
     sentry: SentryElf
     apps: list[AppElf] = []
 
@@ -61,7 +61,7 @@ def _add_kernel_regions(layout: memory.Layout, sentry: SentryElf) -> None:
     )
 
 
-def _add_idle_regions(layout: memory.Layout, sentry: SentryElf) -> T.Tuple[int, int]:
+def _add_idle_regions(layout: memory.Layout, sentry: SentryElf) -> tuple[int, int]:
     idle_text_saddr, idle_text_size = sentry.get_section_info(".idle_task")
     idle_ram_saddr, idle_ram_size = sentry.get_section_info("._idle")
     # XXX: hardcoded name
