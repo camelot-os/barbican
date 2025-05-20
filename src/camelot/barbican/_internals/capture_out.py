@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Ledger SAS
+# SPDX-FileCopyrightText: 2025 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -10,7 +11,6 @@ Execute a random command and capture stdout to file
 
 from argparse import ArgumentParser, REMAINDER
 from pathlib import Path
-import typing as T
 import subprocess
 
 
@@ -28,7 +28,7 @@ def argument_parser() -> ArgumentParser:
     return parser
 
 
-def run(argv: T.List[str]) -> None:
+def run(argv: list[str]) -> None:
     """Execute capture stdout internal command."""
     args = argument_parser().parse_args(argv)
     run_capture_stdout(args.cmdline, args.out)

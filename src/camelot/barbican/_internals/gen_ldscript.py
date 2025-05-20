@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Ledger SAS
+# SPDX-FileCopyrightText: 2025 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -9,7 +10,6 @@ TODO : documentation
 
 from argparse import ArgumentParser
 from pathlib import Path
-import typing as T
 
 from jinja2 import Environment, BaseLoader
 import json
@@ -56,7 +56,7 @@ def argument_parser() -> ArgumentParser:
     return parser
 
 
-def run(argv: T.List[str]) -> None:
+def run(argv: list[str]) -> None:
     """Execute gen_ldscript internal command."""
     args = argument_parser().parse_args(argv)
     run_gen_ldscript(args.name, args.template, args.layout, args.output)

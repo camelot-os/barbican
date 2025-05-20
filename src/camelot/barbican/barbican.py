@@ -10,7 +10,6 @@ import os
 import logging
 import pathlib
 import sys
-import typing as T
 
 from .console import console
 from .logger import logger, log_config
@@ -315,7 +314,7 @@ def run_command() -> None:
     args.func(project)
 
 
-def run_internal_command(cmd: str, argv: T.List[str]) -> None:
+def run_internal_command(cmd: str, argv: list[str]) -> None:
     """Run an internal barbican command.
 
     :param cmd: internal command name

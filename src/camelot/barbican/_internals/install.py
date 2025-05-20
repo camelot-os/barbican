@@ -1,11 +1,11 @@
 # SPDX-FileCopyrightText: 2024 Ledger SAS
+# SPDX-FileCopyrightText: 2025 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
 from argparse import ArgumentParser, REMAINDER
 from pathlib import Path
 import shutil
-import typing as T
 
 from ..console import console
 
@@ -36,6 +36,6 @@ def argument_parser() -> ArgumentParser:
     return parser
 
 
-def run(argv: T.List[str]) -> None:
+def run(argv: list[str]) -> None:
     args = argument_parser().parse_args(argv)
     run_install(args.from_dir, args.files, args.suffix)

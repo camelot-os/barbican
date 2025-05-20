@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Ledger SAS
+# SPDX-FileCopyrightText: 2025 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -19,9 +20,9 @@ from ..utils import memory_layout as memory
 from ..utils import align_to, pow2_round_up
 
 
-def _get_project_elves(exelist: list[Path]) -> T.Tuple[SentryElf, T.List[AppElf]]:
+def _get_project_elves(exelist: list[Path]) -> T.Tuple[SentryElf, list[AppElf]]:
     sentry: SentryElf
-    apps: T.List[AppElf] = []
+    apps: list[AppElf] = []
 
     for elf in exelist:
         name = elf.stem
@@ -307,7 +308,7 @@ def argument_parser() -> ArgumentParser:
     return parser
 
 
-def run(argv: T.List[str]) -> None:
+def run(argv: list[str]) -> None:
     """Execute memory_layout internal command."""
     args = argument_parser().parse_args(argv)
 

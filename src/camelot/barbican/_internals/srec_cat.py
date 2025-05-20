@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Ledger SAS
+# SPDX-FileCopyrightText: 2025 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -21,9 +22,9 @@ _SREC_CAT_FORMAT: T.Dict[str, str] = {
 }
 
 
-def run_srec_cat(inputs: T.List[Path], output: Path, format: str) -> None:
+def run_srec_cat(inputs: list[Path], output: Path, format: str) -> None:
     srec_cat = find_program("srec_cat")
-    cmdline: T.List[str] = [srec_cat]
+    cmdline: list[str] = [srec_cat]
 
     for input in inputs:
         cmdline.extend([str(input.resolve(strict=True)), format])
@@ -47,7 +48,7 @@ def argument_parser() -> ArgumentParser:
     return parser
 
 
-def run(argv: T.List[str]) -> None:
+def run(argv: list[str]) -> None:
     """Execute srec_cat internal command."""
     args = argument_parser().parse_args(argv)
     run_srec_cat(args.inputs, args.output, _SREC_CAT_FORMAT[args.format])

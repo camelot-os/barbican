@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Ledger SAS
+# SPDX-FileCopyrightText: 2025 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -9,7 +10,6 @@ Add target specific and per apps compile flags in a config.
 
 from argparse import ArgumentParser
 from pathlib import Path
-import typing as T
 
 
 def run_cargo_config(rustargs: Path, target: Path, extra_args: str, outdir: Path) -> None:
@@ -46,7 +46,7 @@ def argument_parser() -> ArgumentParser:
     return parser
 
 
-def run(argv: T.List[str]) -> None:
+def run(argv: list[str]) -> None:
     """Execute gen crate cargo config command."""
     args = argument_parser().parse_args(argv)
     run_cargo_config(args.rustargs_file, args.target_file, args.extra_args, args.outdir)

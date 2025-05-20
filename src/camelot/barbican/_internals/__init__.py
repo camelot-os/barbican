@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Ledger SAS
+# SPDX-FileCopyrightText: 2025 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -30,7 +31,7 @@ One can call internal command with the following:
 
             Returns the Python's :py:type:`argparse.ArgumentParser` for the given internal command
 
-        .. function:: run(argv: T.List[str]) -> None:
+        .. function:: run(argv: list[str]) -> None:
 
             Execute the internal command.
 """

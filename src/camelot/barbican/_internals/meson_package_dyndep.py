@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Ledger SAS
+# SPDX-FileCopyrightText: 2025 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -146,7 +147,7 @@ def argument_parser() -> ArgumentParser:
     return parser
 
 
-def run(argv: T.List[str]) -> None:
+def run(argv: list[str]) -> None:
     """Execute meson package dyndep internal command."""
     args = argument_parser().parse_args(argv)
     run_meson_package_dyndep(args.name, args.builddir, args.stagingdir, args.dyndep, args.json)
