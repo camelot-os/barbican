@@ -11,18 +11,17 @@ Barbican is the Camelot OS meta tools for building project, SDK and integration,
 written in python.
 
 ## Dependencies
- - Python >= 3.10
+ - Python >= 3.11
  - Jinja2 >= 3.1.0
  - jinja-cli >= 1.2.0
  - jsonschema >= 4.18.0
  - kconfiglib >= 14.1.0
- - lief >= 0.13,<0.15
+ - lief >= 0.15
  - meson >= 1.7
  - ninja >= 1.11.0
  - ninja_syntax > 1.7
  - svd2json >= 0.1.6
  - dts-utils >= 0.3.0
- - tomli >= 2.0.1; python_version < '3.11'
  - referencing >= 0.33.0
  - rich >= 13.6
  - GitPython >= 3.1.43

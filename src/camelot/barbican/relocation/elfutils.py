@@ -257,7 +257,7 @@ class AppElf(Elf):
                     note_sym = sym
                     break
 
-            self._elf.remove_static_symbol(note_sym)
+            self._elf.remove_symtab_symbol(note_sym)
             self._elf.remove_section(note_name)
 
         # XXX
@@ -275,7 +275,7 @@ class AppElf(Elf):
         # After removing note(s) symbol section
         # patch section offset in that segment
         for segment in self._elf.segments:
-            if segment.type == lief.ELF.SEGMENT_TYPES.LOAD:
+            if segment.type == lief.ELF.Segment.TYPE.LOAD:
                 offset = segment.file_offset
                 print(offset)
                 sections = segment.sections
