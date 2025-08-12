@@ -101,7 +101,9 @@ class Project:
         ninja.add_barbican_rules()
         ninja.add_barbican_internals_rules()
         ninja.add_barbican_targets(self)
-        ninja.add_barbican_cross_file(pathlib.Path(self._toml["crossfile"]))
+        ninja.add_barbican_cross_file(
+            (pathlib.Path(self.path.project_dir) / self._toml["crossfile"]).resolve(strict=True)
+        )
         dts_include_dirs = []
         for p in self._packages:
             dts_include_dirs.extend(p.dts_include_dirs)

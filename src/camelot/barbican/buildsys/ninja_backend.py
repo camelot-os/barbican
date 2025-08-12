@@ -94,7 +94,7 @@ class NinjaGenFile:
 
     def add_barbican_cross_file(self, crossfile: Path) -> None:
         self._ninja.newline()
-        self._ninja.variable("crossfile", str(crossfile))
+        self._ninja.variable("crossfile", str(crossfile.resolve(strict=True)))
 
     def add_internal_gen_memory_layout_target(
         self,
