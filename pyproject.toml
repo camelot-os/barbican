@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2023 - 2024 Ledger SAS
-# SPDX-FileCopyrightText: 2025 H2Lab
+# SPDX-FileCopyrightText: 2025 - 2026 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -47,6 +47,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 
 [project.urls]
