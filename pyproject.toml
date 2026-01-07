@@ -74,7 +74,7 @@ devel = [
 doc = [
     "Sphinx>=7.2.0",
     "sphinx-rtd-theme>=2.0.0",
-    "sphinx-simplepdf>=1.6.0",
+    "sphinx-simplepdf>=1.7.0",
     "sphinx-autoapi",
     "sphinx-argparse",
 ]
