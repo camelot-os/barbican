@@ -16,7 +16,7 @@ from ..scm import scm_create
 import typing as T
 
 if T.TYPE_CHECKING:
-    from ..barbican import Project
+    from ..project import Project
 
 
 @unique
