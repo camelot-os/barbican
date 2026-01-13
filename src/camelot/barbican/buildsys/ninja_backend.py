@@ -11,7 +11,7 @@ from ..utils.environment import find_program
 
 if TYPE_CHECKING:
     from ..package import Package
-    from ..barbican import Project
+    from ..project import Project
 
 
 class NinjaGenFile:
