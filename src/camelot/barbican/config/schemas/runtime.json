@@ -1,0 +1,18 @@
+{
+    "$id": "urn:barbican:runtime",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "scm": { "$ref": "urn:barbican:scm" },
+        "config": { "type": "string" },
+        "build": {
+            "type": "object",
+            "properties": {
+                "options": { "$ref": "urn:barbican:build#/properties/options" }
+            },
+            "required": [ "options" ]
+        }
+    },
+    "required": [ "scm", "config" ],
+    "additionalProperties": false
+}
