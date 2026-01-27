@@ -24,7 +24,7 @@ def uris() -> list[str]:
     uris = list()
     for f in files("camelot.barbican").joinpath("config/schemas").iterdir():
         name = f.stem
-        uris.append(f"urn:barbican:{name.replace("_", ":")}")
+        uris.append(f"urn:barbican:{name.replace('_', ':')}")
 
     return uris
 
