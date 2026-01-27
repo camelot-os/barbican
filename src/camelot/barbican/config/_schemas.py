@@ -3,12 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
+
+from collections.abc import Iterator
 from importlib.resources import files
 
 from referencing import Resource
 
 
-def _schemas():
+def _schemas() -> Iterator[Resource]:
     for f in files(__package__).joinpath("schemas").iterdir():
         contents = json.loads(f.read_text(encoding="utf-8"))
         yield Resource.from_contents(contents)
