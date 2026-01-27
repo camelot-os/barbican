@@ -1,0 +1,14 @@
+{
+    "$id": "urn:barbican:scm:git",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "uri": {
+            "type": "string",
+            "format": "uri"
+        },
+        "revision": { "type": "string" }
+    },
+    "required": [ "uri", "revision"],
+    "additionalProperties": false
+}
