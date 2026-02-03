@@ -18,7 +18,7 @@ class Kernel:
     def __init__(self, parent, config: dict) -> None:
         self._package = Meson("kernel", parent, config["kernel"], Package.Type.Kernel)
         _subprojects_dir = self._package.src_dir / "subprojects"
-        _kconfig_dir : Path | None = None
+        _kconfig_dir: Path | None = None
 
         # XXX: need SDK support here
         # workaround for the following use case.
@@ -34,7 +34,7 @@ class Kernel:
                 _kconfig_dir = p
                 break
 
-        if p is None or not p.exists():
+        if _kconfig_dir is None or not _kconfig_dir.exists():
             raise Exception("kconfig not found")
 
         self._cargo_manifests = {
