@@ -17,20 +17,30 @@ from ..utils import working_directory
 class Kernel:
     def __init__(self, parent, config: dict) -> None:
         self._package = Meson("kernel", parent, config["kernel"], Package.Type.Kernel)
+        _subprojects_dir = self._package.src_dir / "subprojects"
+        _kconfig_dir: Path | None = None
+
+        # XXX: need SDK support here
+        # workaround for the following use case.
+        #
+        # Kernel may use frozen version instead of git refs for its subprojects,
+        # this implies usage of release tarball and thus, meson will append the
+        # package version after the wrap name.
+        #
+        # One need to glob `kconfig*` from subprojects directory and stop at first directory found.
+        # (fyi, glob will return a generator w/ the wrap file and package source directory).
+        for p in _subprojects_dir.glob("kconfig*"):
+            if p.is_dir():
+                _kconfig_dir = p
+                break
+
+        if _kconfig_dir is None or not _kconfig_dir.exists():
+            raise Exception("kconfig not found")
+
         self._cargo_manifests = {
             "sentry-uapi": self._package.src_dir / "uapi" / "Cargo.toml",
-            "kconfig": self._package.src_dir
-            / "subprojects"
-            / "kconfig"
-            / "rust"
-            / "kconfig"
-            / "Cargo.toml",
-            "kconfig_import": self._package.src_dir
-            / "subprojects"
-            / "kconfig"
-            / "rust"
-            / "kconfig_import"
-            / "Cargo.toml",
+            "kconfig": _kconfig_dir / "rust" / "kconfig" / "Cargo.toml",
+            "kconfig_import": _kconfig_dir / "rust" / "kconfig_import" / "Cargo.toml",
         }
 
         self._cargo_home: Path = parent.path.sysroot_data_dir / "cargo"
