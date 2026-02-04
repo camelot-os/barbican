@@ -34,14 +34,16 @@ class Kernel:
                 _kconfig_dir = p
                 break
 
-        if _kconfig_dir is None or not _kconfig_dir.exists():
-            raise Exception("kconfig not found")
-
-        self._cargo_manifests = {
-            "sentry-uapi": self._package.src_dir / "uapi" / "Cargo.toml",
-            "kconfig": _kconfig_dir / "rust" / "kconfig" / "Cargo.toml",
-            "kconfig_import": _kconfig_dir / "rust" / "kconfig_import" / "Cargo.toml",
-        }
+        # XXX:
+        #  Ugly workaround, Fix this !
+        #  This requires download to be done, so, if not found, assume that we execute
+        #  the build command.
+        if _kconfig_dir is not None and _kconfig_dir.exists():
+            self._cargo_manifests = {
+                "sentry-uapi": self._package.src_dir / "uapi" / "Cargo.toml",
+                "kconfig": _kconfig_dir / "rust" / "kconfig" / "Cargo.toml",
+                "kconfig_import": _kconfig_dir / "rust" / "kconfig_import" / "Cargo.toml",
+            }
 
         self._cargo_home: Path = parent.path.sysroot_data_dir / "cargo"
         self._rustargs = self._cargo_home / "rustargs"
