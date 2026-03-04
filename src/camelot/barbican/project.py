@@ -9,7 +9,7 @@ import pathlib
 
 from .console import console
 from .logger import logger
-from . import config
+from .config.validator import validate_project_config
 from .package import Package, create_package, Backend
 from .package.kernel import Kernel
 from .package.runtime import Runtime
@@ -32,7 +32,7 @@ class Project:
         #  Even if toml is a text format, the file must be opened as binary file
         with self.path.config_full_path.open("rb") as f:
             self._toml = tomllib.load(f)
-            config.validate(self._toml)
+            validate_project_config(self._toml)
 
         console.title(f"Barbican project '{self.name}'")
 

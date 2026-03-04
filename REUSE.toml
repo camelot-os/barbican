@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2024 Ledger SAS
-# SPDX-FileCopyrightText: 2025 H2Lab
+# SPDX-FileCopyrightText: 2025 - 2026 H2Lab
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -11,5 +11,11 @@ SPDX-PackageDownloadLocation = "https://github.com/camelot-os/barbican"
 [[annotations]]
 path = "doc/**"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2025 H2Lab"
+SPDX-FileCopyrightText = "2025 - 2026 H2Lab"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "src/camelot/barbican/config/schemas/*.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 H2Lab"
 SPDX-License-Identifier = "Apache-2.0"

@@ -1,0 +1,54 @@
+{
+    "$id": "urn:barbican:project",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "barbican project TOML configuration",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "Project Name"
+        },
+        "version": {
+            "type": "string"
+        },
+        "license": {
+            "type": "string",
+            "description": "license identifier (must be a valid SPDX License Identifier)"
+        },
+        "license_file": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "license file name"
+        },
+        "dts": {
+            "type": "string",
+            "description": "DTS file"
+        },
+        "crossfile": {
+            "type": "string",
+            "description": "meson cross file for arch mcu"
+        },
+        "kernel": {
+            "$ref": "urn:barbican:kernel"
+        },
+        "runtime": {
+            "$ref": "urn:barbican:runtime"
+        },
+        "application": {
+            "patternProperties": {
+                ".*": {
+                    "type": "object",
+                    "$ref": "urn:barbican:application"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "required": [ "name", "dts", "kernel", "version" ],
+    "dependentRequired": {
+        "license": ["license_file"],
+        "license_file": ["license"]
+    }
+}

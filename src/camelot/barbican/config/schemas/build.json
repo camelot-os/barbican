@@ -1,0 +1,26 @@
+{
+    "$id": "urn:barbican:build",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "backend": {
+            "type": "string",
+            "enum": ["meson", "cargo"]
+        },
+        "options": {
+            "type": "object",
+            "properties": {
+                "static_pie": { "type": "boolean" }
+            },
+            "additionalProperties": {
+                "oneOf": [
+                    { "type": "string" },
+                    { "type": "boolean" },
+                    { "type": "integer" }
+                ]
+            }
+        }
+    },
+    "required": [ "backend" ],
+    "additionalProperties": false
+}
