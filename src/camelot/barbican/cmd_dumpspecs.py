@@ -3,18 +3,24 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from argparse import ArgumentParser, Namespace
-from logging import root
 
-from .project import Project
-from .console import console
-
+import rich.console
 import json
-import argparse
 from pathlib import Path
 from typing import Dict, Optional, List
 
 from rich.table import Table
 from rich import box
+
+from .project import Project
+
+# get back console instance for rendering, we want to use the same console
+# for all rendering to ensure consistent output and proper handling of colors
+# and formatting
+# TODO: while the local console module do not handle tables properly, we
+# still use the rich console directly here, but we might want to refactor the console
+# module to provide a unified interface that includes support for tables instead.
+console = rich.console.Console()
 
 
 # About memory layout information parts
@@ -23,12 +29,6 @@ from rich import box
 # Utility functions for processing and displaying memory regions permissions
 # so that the main logic is cleaner and easier to read that an integer
 def __decode_permissions(perm: int) -> str:
-    """
-    Convention :
-        bit 0 -> R
-        bit 1 -> W
-        bit 2 -> X
-    """
     flags = [("X", 2), ("W", 1), ("R", 0)]
     return "".join(letter if perm & (1 << bit) else "-" for letter, bit in flags)
 
@@ -149,17 +149,10 @@ def __parse_config_file(path: Path) -> Dict[str, str]:
     return config
 
 
-def __is_valid_task_config(config: Dict[str, str]) -> bool:
-    return "CONFIG_TASK_MAGIC_VALUE" in config and "CONFIG_TASK_LABEL" in config
-
-
 # Extract relevant task information from a .config file, return None if the config
 # is not a valid task configuration
-def __extract_task_info(path: Path) -> Optional[Dict]:
+def __extract_task_info(task_name: str, path: Path) -> Optional[Dict]:
     config = __parse_config_file(path)
-
-    if not __is_valid_task_config(config):
-        return None
 
     def get_value(key: str, default: str = "") -> str:
         return config.get(key, default)
@@ -172,7 +165,7 @@ def __extract_task_info(path: Path) -> Optional[Dict]:
     ]
 
     return {
-        "task_name": path.stem,
+        "task_name": task_name,
         "label": get_value("CONFIG_TASK_LABEL"),
         "magic": get_value("CONFIG_TASK_MAGIC_VALUE"),
         "priority": get_value("CONFIG_TASK_PRIORITY"),
@@ -225,6 +218,7 @@ def add_arguments(parser: ArgumentParser) -> None:
 
 def run(args: Namespace) -> None:
     layout_path = Path(args.projectdir) / "output" / "build" / "camelot_private" / "layout.json"
+    project = Project(args.projectdir)
 
     if not layout_path.exists():
         console.print(f"[bold red]Error:[/bold red] File not found: {layout_path}")
@@ -243,16 +237,12 @@ def run(args: Namespace) -> None:
 
     __render_layout(regions)
 
-    config_path = Path(args.projectdir) / "configs"
-
-    if not config_path.exists() or not config_path.is_dir():
-        console.print(f"[bold red]Error:[/bold red] Invalid directory: {config_path}")
-        raise SystemExit(1)
-
     tasks = []
 
-    for config_file in config_path.rglob("*.config"):
-        task_info = __extract_task_info(config_file)
+    for app in project.apps:
+        config_path = app.config_path
+
+        task_info = __extract_task_info(app.name, config_path)
         if task_info:
             tasks.append(task_info)
 

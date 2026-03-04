@@ -128,6 +128,10 @@ class Package(ABC):
         return self._type == Package.Type.Application
 
     @property
+    def config_path(self) -> Path:
+        return self._dotconfig
+
+    @property
     def is_kernel(self) -> bool:
         return self._type == Package.Type.Kernel
 
