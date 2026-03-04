@@ -6,22 +6,23 @@ from argparse import ArgumentParser, Namespace
 from logging import root
 
 from .project import Project
+from .console import console
 
 import json
 import argparse
 from pathlib import Path
 from typing import Dict, Optional, List
 
-from rich.console import Console
 from rich.table import Table
 from rich import box
 
 
 # About memory layout information parts
 
-# Utility functions for processing and displaying memory regions permissions
+
+# Utility functions for processing and displaying memory regions permissions
 # so that the main logic is cleaner and easier to read that an integer
-def decode_permissions(perm: int) -> str:
+def __decode_permissions(perm: int) -> str:
     """
     Convention :
         bit 0 -> R
@@ -31,9 +32,10 @@ def decode_permissions(perm: int) -> str:
     flags = [("X", 2), ("W", 1), ("R", 0)]
     return "".join(letter if perm & (1 << bit) else "-" for letter, bit in flags)
 
+
 # Determine color based on region type
 # very basic for now, enough to be visually distinguishable
-def region_color(region_type: str) -> str:
+def __region_color(region_type: str) -> str:
     if region_type.lower() == "text":
         return "cyan"
     if region_type.lower() == "ram":
@@ -41,10 +43,10 @@ def region_color(region_type: str) -> str:
     return "white"
 
 
-# Detect overlapping regions, return a list of booleans indicating if each region
+# Detect overlapping regions, return a list of booleans indicating if each region
 # is involved in a collision.
 # This is O(n^2) but we expect a small number of regions so it should be fine.
-def detect_collisions(regions: List[Dict]) -> List[bool]:
+def __detect_collisions(regions: List[Dict]) -> List[bool]:
     enriched = []
     for r in regions:
         start = int(r["start_address"], 16)
@@ -72,7 +74,7 @@ def detect_collisions(regions: List[Dict]) -> List[bool]:
 
 
 # Effective rendering of the memory layout using rich
-def render_layout(regions: List[Dict]) -> None:
+def __render_layout(regions: List[Dict]) -> None:
     table = Table(
         title="Memory Mapping",
         box=box.ROUNDED,
@@ -89,20 +91,17 @@ def render_layout(regions: List[Dict]) -> None:
     table.add_column("Perm", justify="center")
     table.add_column("", justify="center", width=3)
 
-    collisions = detect_collisions(regions)
+    collisions = __detect_collisions(regions)
 
-    regions_sorted = sorted(
-        enumerate(regions),
-        key=lambda x: int(x[1]["start_address"], 16)
-    )
+    regions_sorted = sorted(enumerate(regions), key=lambda x: int(x[1]["start_address"], 16))
 
     for original_index, r in regions_sorted:
         start = int(r["start_address"], 16)
         size = int(r["size"], 16)
         end = start + size - 1
 
-        perms = decode_permissions(r["permission"])
-        color = region_color(r["type"])
+        perms = __decode_permissions(r["permission"])
+        color = __region_color(r["type"])
 
         collision_flag = collisions[original_index]
         collision_marker = "[bold red]X[/bold red]" if collision_flag else ""
@@ -120,16 +119,18 @@ def render_layout(regions: List[Dict]) -> None:
             style=row_style,
         )
 
-    Console().print(table)
+    console.print(table)
+
 
 # about tasks configuration overview, not directly related to memory layout but can
 # be useful for overall system understanding
 
+
 # .config to dict configuration. We only care about task configuration but we need
 # to parse the whole file to detect if it's a valid task config and to extract capabilities.
-# XXX: maybe a tool such as kconfiglib could be used for a more robust parsing,
+# XXX: maybe a tool such as kconfiglib could be used for a more robust parsing,
 # but for now this should be enough by now.
-def parse_config_file(path: Path) -> Dict[str, str]:
+def __parse_config_file(path: Path) -> Dict[str, str]:
     config = {}
 
     with path.open("r", encoding="utf-8", errors="ignore") as f:
@@ -148,18 +149,16 @@ def parse_config_file(path: Path) -> Dict[str, str]:
     return config
 
 
-def is_valid_task_config(config: Dict[str, str]) -> bool:
-    return (
-        "CONFIG_TASK_MAGIC_VALUE" in config and
-        "CONFIG_TASK_LABEL" in config
-    )
+def __is_valid_task_config(config: Dict[str, str]) -> bool:
+    return "CONFIG_TASK_MAGIC_VALUE" in config and "CONFIG_TASK_LABEL" in config
+
 
 # Extract relevant task information from a .config file, return None if the config
 # is not a valid task configuration
-def extract_task_info(path: Path) -> Optional[Dict]:
-    config = parse_config_file(path)
+def __extract_task_info(path: Path) -> Optional[Dict]:
+    config = __parse_config_file(path)
 
-    if not is_valid_task_config(config):
+    if not __is_valid_task_config(config):
         return None
 
     def get_value(key: str, default: str = "") -> str:
@@ -180,13 +179,13 @@ def extract_task_info(path: Path) -> Optional[Dict]:
         "quantum": get_value("CONFIG_TASK_QUANTUM"),
         "autostart": "true" if config.get("CONFIG_TASK_AUTO_START") == "y" else "false",
         "stack_size": get_value("CONFIG_TASK_STACK_SIZE"),
-        "capabilities": ", ".join(sorted(capabilities))
+        "capabilities": ", ".join(sorted(capabilities)),
     }
 
 
 # rendering of the tasks configuration overview for usefull information
 # helping with understanding the system configuration and scheduling behavior
-def render_tasks(tasks: List[Dict]):
+def __render_tasks(tasks: List[Dict]):
     table = Table(
         title="Task Configuration Overview",
         box=box.ROUNDED,
@@ -217,7 +216,7 @@ def render_tasks(tasks: List[Dict]):
             task["capabilities"],
         )
 
-    Console().print(table)
+    console.print(table)
 
 
 def add_arguments(parser: ArgumentParser) -> None:
@@ -228,36 +227,36 @@ def run(args: Namespace) -> None:
     layout_path = Path(args.projectdir) / "output" / "build" / "camelot_private" / "layout.json"
 
     if not layout_path.exists():
-        Console().print(f"[bold red]Error:[/bold red] File not found: {layout_path}")
+        console.print(f"[bold red]Error:[/bold red] File not found: {layout_path}")
         raise SystemExit(1)
 
     try:
         data = json.loads(layout_path.read_text())
     except json.JSONDecodeError as e:
-        Console().print(f"[bold red]Invalid JSON:[/bold red] {e}")
+        console.print(f"[bold red]Invalid JSON:[/bold red] {e}")
         raise SystemExit(1)
 
     regions = data.get("regions", [])
     if not regions:
-        Console().print("[yellow]Warning:[/yellow] No regions found in layout.")
+        console.print("[yellow]Warning:[/yellow] No regions found in layout.")
         return
 
-    render_layout(regions)
+    __render_layout(regions)
 
     config_path = Path(args.projectdir) / "configs"
 
     if not config_path.exists() or not config_path.is_dir():
-        Console().print(f"[bold red]Error:[/bold red] Invalid directory: {config_path}")
+        console.print(f"[bold red]Error:[/bold red] Invalid directory: {config_path}")
         raise SystemExit(1)
 
     tasks = []
 
     for config_file in config_path.rglob("*.config"):
-        task_info = extract_task_info(config_file)
+        task_info = __extract_task_info(config_file)
         if task_info:
             tasks.append(task_info)
 
     if not tasks:
-        Console().print("[yellow]No valid task configurations found.[/yellow]")
+        console.print("[yellow]No valid task configurations found.[/yellow]")
 
-    render_tasks(tasks)
+    __render_tasks(tasks)
