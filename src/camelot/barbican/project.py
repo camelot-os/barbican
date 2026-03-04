@@ -68,6 +68,10 @@ class Project:
             self._noapp = True
 
     @property
+    def apps(self) -> list[Package]:
+        return [p for p in self._packages if p.is_application]
+
+    @property
     def name(self) -> str:
         return self._toml["name"]
 

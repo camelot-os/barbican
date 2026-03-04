@@ -14,7 +14,7 @@ from .logger import logger, log_config
 
 class CommandLineArguments:
     def __init__(self) -> None:
-        from . import cmd_download, cmd_setup, cmd_update
+        from . import cmd_download, cmd_setup, cmd_update, cmd_dumpspecs
 
         self.parser = ArgumentParser(prog="barbican", add_help=True)
         self.subparsers = self.parser.add_subparsers(
@@ -35,6 +35,9 @@ class CommandLineArguments:
             "update", cmd_update.add_arguments, cmd_update.run, "update project packages sources"
         )
         self.add_command("setup", cmd_setup.add_arguments, cmd_setup.run, "setup project")
+        self.add_command(
+            "dumpspecs", cmd_dumpspecs.add_arguments, cmd_dumpspecs.run, "dump project specs"
+        )
 
     def _log_level_arguments(self) -> ArgumentParser:
         parser = ArgumentParser(add_help=False)
