@@ -277,7 +277,6 @@ class AppElf(Elf):
         for segment in self._elf.segments:
             if segment.type == lief.ELF.Segment.TYPE.LOAD:
                 offset = segment.file_offset
-                print(offset)
                 sections = segment.sections
                 if sections and offset != sections[0].file_offset:
                     logger.debug("patching section offset in segment")
