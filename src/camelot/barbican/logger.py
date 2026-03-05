@@ -19,7 +19,6 @@ class LoggerConfig:
         )
 
     def set_console_log_level(self, level: int | str) -> None:
-        print(level)
         self._console_handler.setLevel(level)
 
 
