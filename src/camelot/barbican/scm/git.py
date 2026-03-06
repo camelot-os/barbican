@@ -5,13 +5,20 @@
 from git import Repo, RemoteProgress, FetchInfo
 from git.exc import InvalidGitRepositoryError, NoSuchPathError
 
-from ..logger import logger
-
-from .scm import ScmBaseClass
-
 from typing import Optional, cast
 
+from rich.progress import (
+    BarColumn,
+    Progress,
+    MofNCompleteColumn,
+    SpinnerColumn,
+    TextColumn,
+    TimeRemainingColumn,
+)
+
+from ..logger import logger
 from ..console import console
+from .scm import ScmBaseClass
 
 
 class GitProgressBar(RemoteProgress):
@@ -31,7 +38,19 @@ class GitProgressBar(RemoteProgress):
 
     def __init__(self) -> None:
         super().__init__()
-        self._progressbar = console.progress_bar()
+        self._progressbar = Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            "•",
+            MofNCompleteColumn(),
+            "•",
+            TimeRemainingColumn(),
+            TextColumn("{task.fields[message]}"),
+            transient=False,
+            console=console._console,
+        )
 
     def __del__(self) -> None:
         if self._progressbar.live.is_started:
