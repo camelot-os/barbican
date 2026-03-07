@@ -94,19 +94,6 @@ class Console:
 
         return __default
 
-    def progress_bar(self, transient: bool = False) -> rich.progress.Progress:
-        return rich.progress.Progress(
-            rich.progress.SpinnerColumn(),
-            rich.progress.TextColumn("[progress.description]{task.description}"),
-            rich.progress.BarColumn(),
-            rich.progress.TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            "eta",
-            rich.progress.TimeRemainingColumn(),
-            rich.progress.TextColumn("{task.fields[message]}"),
-            transient=transient,
-            console=self._console,
-        )
-
     def status(self, message: str) -> rich.status.Status:
         return rich.status.Status(message, spinner="moon", console=self._console)
 
