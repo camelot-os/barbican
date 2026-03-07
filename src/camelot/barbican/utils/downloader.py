@@ -4,6 +4,7 @@
 
 import os
 import requests
+import sys
 
 from pathlib import Path
 from urllib3.util import parse_url
@@ -79,7 +80,16 @@ def _download(url: str, dest_dir: Path, progress: Progress, task_id: TaskID) -> 
     # Once download is done, temp file is closed and renamed, one can use os.rename
     # safely here as there is no cwd change.
     # Once rename, delete flag is set to False to keep downloaded file on the filesystem.
-    with NamedTemporaryFile("wb", delete_on_close=False, dir=dest_dir) as f:
+
+    # XXX:
+    #   `delete_on_close` is a py3.12+ kwargs.
+    #   As we still support py3.11, we need to workaround here.
+    #   To be removed when python 3.11 support will be dropped.
+    kwargs = dict()
+    if sys.version_info.major == 3 and sys.version_info.minor >= 12:
+        kwargs["delete_on_close"] = False
+
+    with NamedTemporaryFile("wb", dir=dest_dir, **kwargs) as f:  # type: ignore
         logger.debug(f"downloading to temporary file {f.name}")
         progress.start_task(task_id)
 
@@ -93,6 +103,14 @@ def _download(url: str, dest_dir: Path, progress: Progress, task_id: TaskID) -> 
             progress.update(task_id, advance=len(chunk))
         if length == 0:
             progress.update(task_id, total=f.tell())
+
+        # XXX:
+        #   Note that, as a side effect, if there is a crash between file close and rename
+        #   operations, the temporary file will not be removed in python 3.11 and prior version
+        if sys.version_info.major == 3 and sys.version_info.minor < 12:
+            f.delete = False
+            f._closer.delete = False
+
         f.close()
         os.rename(f.name, filepath)
         # Once renamed to final download name, set delete flag to False and exit context manager
