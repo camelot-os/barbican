@@ -49,7 +49,7 @@ def _progress_bar() -> Progress:
     )
 
 
-def _download(url: str, dest_dir: Path, progress: Progress, task_id: TaskID) -> None:
+def _download(url: str, dest_dir: Path, progress: Progress, task_id: TaskID) -> Path:
     console.message(f"[b]Downloading[/b] [i]{url}[/i]")
 
     # use curl user-agent to pass through anti-bot/anti-crawler reverse proxy on some
@@ -116,9 +116,10 @@ def _download(url: str, dest_dir: Path, progress: Progress, task_id: TaskID) -> 
         # Once renamed to final download name, set delete flag to False and exit context manager
         f.delete = False
         f._closer.delete = False
+    return filepath
 
 
-def download_file(url: str, dest_dir: Path) -> None:
+def download_file(url: str, dest_dir: Path) -> Path:
     progress = _progress_bar()
     with progress:
         task_id = progress.add_task("download", start=False, filename="")
