@@ -11,6 +11,7 @@ from .scm import ScmBaseClass
 @unique
 class ScmMethodEnum(StrEnum):
     Git = auto()
+    Tarball = auto()
 
 
 class ScmMethodFactoryMap(collections.abc.Mapping[ScmMethodEnum, collections.abc.Callable]):
