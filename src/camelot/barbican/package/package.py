@@ -231,7 +231,7 @@ class Package(ABC):
         return cls.__backend_factories[Backend(backend)]
 
     def download(self) -> None:
-        logger.info(f"Downloading {self.name} from {self.url}")
+        logger.info(f"Downloading {self.name} from {self._scm.url}")
         self.src_dir.mkdir(parents=True, exist_ok=True)
         self._scm.download()
 
