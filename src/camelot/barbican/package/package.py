@@ -83,7 +83,9 @@ class Package(ABC):
         self._type: Package.Type = type
         self._parent = parent_project
         self._config = config_node
-        self._scm = scm_create(name, parent_project.path.src_dir, self._config)
+        self._scm = scm_create(
+            name, parent_project.path.dl_dir, parent_project.path.src_dir, self._config
+        )
 
         self._provides: list[str]
         if self._type == Package.Type.Kernel:

@@ -37,10 +37,10 @@ class ScmMethodFactoryMap(collections.abc.Mapping[ScmMethodEnum, collections.abc
 SCM_FACTORY_DICT = ScmMethodFactoryMap()
 
 
-def scm_create(name: str, src_dir: Path, config: dict) -> ScmBaseClass:
+def scm_create(name: str, dl_dir: Path, src_dir: Path, config: dict) -> ScmBaseClass:
     if len(config["scm"].items()) != 1:
         # TODO raise Barbican.ConfigurationError
         raise ValueError
     scm_name, scm_config = list(config["scm"].items())[0]
     ScmCls = SCM_FACTORY_DICT[scm_name]
-    return ScmCls(name, src_dir, scm_config)
+    return ScmCls(name, dl_dir, src_dir, scm_config)

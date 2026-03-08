@@ -76,7 +76,7 @@ def git_test_create(path, name, uri, revision):
             }
         }
     }
-    repo = scm_create(name, path, config)
+    repo = scm_create(name, Path(), path, config)
     assert isinstance(repo, Git)
     return repo
 

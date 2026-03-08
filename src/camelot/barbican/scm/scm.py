@@ -7,8 +7,9 @@ from pathlib import Path
 
 
 class ScmBaseClass(ABC):
-    def __init__(self, name: str, src_dir: Path, config: dict) -> None:
+    def __init__(self, name: str, dl_dir: Path, src_dir: Path, config: dict) -> None:
         self._name = name
+        self._dl_dir = dl_dir
         self._src_dir = src_dir
         self._config = config
 
