@@ -24,5 +24,8 @@
         }
     },
     "required": [ "uri" ],
+    "dependentRequired": {
+        "hashfile_uri": ["hash_algorithm"]
+    },
     "additionalProperties": false
 }
