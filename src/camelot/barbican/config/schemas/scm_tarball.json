@@ -1,0 +1,31 @@
+{
+    "$id": "urn:barbican:scm:tarball",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "properties": {
+        "uri": {
+            "type": "string",
+            "format": "uri"
+        },
+        "hashfile_uri": {
+            "type": "string",
+            "format": "uri"
+        },
+        "hash_algorithm": {
+            "type": "string",
+            "default": "sha256",
+            "description": "hash algorithm used"
+        },
+        "strip": {
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "description": "Strip given number of leading components from file names before extraction."
+        }
+    },
+    "required": [ "uri" ],
+    "dependentRequired": {
+        "hashfile_uri": ["hash_algorithm"]
+    },
+    "additionalProperties": false
+}

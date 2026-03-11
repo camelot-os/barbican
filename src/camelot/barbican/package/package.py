@@ -83,7 +83,9 @@ class Package(ABC):
         self._type: Package.Type = type
         self._parent = parent_project
         self._config = config_node
-        self._scm = scm_create(name, parent_project.path.src_dir, self._config)
+        self._scm = scm_create(
+            name, parent_project.path.dl_dir, parent_project.path.src_dir, self._config
+        )
 
         self._provides: list[str]
         if self._type == Package.Type.Kernel:
@@ -229,7 +231,7 @@ class Package(ABC):
         return cls.__backend_factories[Backend(backend)]
 
     def download(self) -> None:
-        logger.info(f"Downloading {self.name} from {self.url}")
+        logger.info(f"Downloading {self.name} from {self._scm.url}")
         self.src_dir.mkdir(parents=True, exist_ok=True)
         self._scm.download()
 

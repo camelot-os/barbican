@@ -2,15 +2,17 @@
     "$id": "urn:barbican:scm",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
-    "oneOf": [
-        {
-            "properties": {
-                "git": {
-                    "$ref": "urn:barbican:scm:git"
-                }
-            },
-            "required": ["git"],
-            "additionalProperties": false
+    "properties": {
+        "git": {
+            "$ref": "urn:barbican:scm:git"
+        },
+        "tarball": {
+            "$ref": "urn:barbican:scm:tarball"
         }
+    },
+    "additionalProperties": false,
+    "oneOf": [
+        { "required": ["git"] },
+        { "required": ["tarball"] }
     ]
 }

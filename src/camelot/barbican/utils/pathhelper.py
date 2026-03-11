@@ -17,6 +17,7 @@ class DirName(StrEnum):
     Bin = auto()
     Build = auto()
     Configs = auto()
+    Dl = auto()
     Dts = auto()
     Host = auto()
     Images = auto()
@@ -131,6 +132,11 @@ class ProjectPath:
 
     @property
     @lru_cache
+    def dl_dir(self) -> Path:
+        return self.output_dir / DirName.Dl.value
+
+    @property
+    @lru_cache
     def rel_prefix(self) -> Path:
         return Path(*self.prefix.parts[1:])
 
@@ -201,6 +207,7 @@ class ProjectPath:
     def mkdirs(self, exist_ok: bool = True) -> None:
         self.output_dir.mkdir(parents=True, exist_ok=exist_ok)
         self.build_dir.mkdir(exist_ok=exist_ok)
+        self.dl_dir.mkdir(exist_ok=exist_ok)
         self.src_dir.mkdir(exist_ok=exist_ok)
         self.host_dir.mkdir(exist_ok=exist_ok)
         self.target_dir.mkdir(exist_ok=exist_ok)
