@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pytest
-from pathlib import Path
+from pathlib import PureWindowsPath, PurePosixPath
 
 from camelot.barbican.builder.ninja import (
     NinjaWriter,
@@ -17,16 +17,28 @@ from camelot.barbican.builder.ninja import (
 
 
 class TestNinjaWriter:
+
+    escape_path_data = [
+        (PurePosixPath("a b", "c:d"), "a$ b/c$:d"),
+        (PureWindowsPath("C:/", "a b", "c d"), "C$:\\a$ b\\c$ d"),
+    ]
+
+    include_data = [
+        str("path/to/other/build.ninja"),
+        PurePosixPath("path", "to", "other", "build.ninja"),
+        PureWindowsPath("path", "to", "other", "build.ninja"),
+    ]
+
     def test_escape_basic(self):
         nw = NinjaWriter()
         assert nw._escape("a b") == "a$ b"
         assert nw._escape("a:b") == "a$:b"
         assert nw._escape("a$b") == "a$$b"
 
-    def test_escape_path(self):
+    @pytest.mark.parametrize("path,expected", escape_path_data, ids=["PosixPath", "WindowsPath"])
+    def test_escape_path(self, path, expected):
         nw = NinjaWriter()
-        p = Path("a b/c:d")
-        assert nw._escape(p) == "a$ b/c$:d"
+        assert nw._escape(path) == expected
 
     def test_wrap_no_wrap(self):
         nw = NinjaWriter(width=80)
@@ -125,10 +137,13 @@ class TestNinjaWriter:
         nw.variable("cc", "gcc")
         assert "cc = gcc\n" == nw.render()
 
-    def test_variable_path(self):
+    @pytest.mark.parametrize("PathType", [PurePosixPath, PureWindowsPath])
+    def test_variable_path(self, PathType):
         nw = NinjaWriter()
-        nw.variable("cc", Path("opt", "bin", "gcc"))
-        assert "cc = opt/bin/gcc\n" == nw.render()
+        path = PathType("opt", "bin", "gcc")
+        nw.variable("cc", path)
+        expected = f"cc = {path}\n"
+        assert expected == nw.render()
 
     def test_pool(self):
         nw = NinjaWriter()
@@ -217,15 +232,17 @@ class TestNinjaWriter:
         assert "  flags = -O2" == lines[1]
         assert "  opts = -Doption" == lines[2]
 
-    def test_include(self):
+    @pytest.mark.parametrize("data", include_data, ids=["str", "PosixPath", "WindowsPath"])
+    def test_include(self, data):
         nw = NinjaWriter()
-        nw.include(Path("path", "to", "other", "build.ninja"))
-        assert nw.render().splitlines()[0] == "include path/to/other/build.ninja"
+        nw.include(data)
+        assert nw.render().splitlines()[0] == f"include {data}"
 
-    def test_subninja(self):
+    @pytest.mark.parametrize("data", include_data, ids=["str", "PosixPath", "WindowsPath"])
+    def test_subninja(self, data):
         nw = NinjaWriter()
-        nw.subninja(Path("path", "to", "other", "build.ninja"))
-        assert nw.render().splitlines()[0] == "subninja path/to/other/build.ninja"
+        nw.subninja(data)
+        assert nw.render().splitlines()[0] == f"subninja {data}"
 
 
 class EmptyBuilder(NinjaBuilderProtocol):

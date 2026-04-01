@@ -5,7 +5,7 @@
 from collections.abc import Iterator
 from dataclasses import dataclass, field, asdict
 from enum import StrEnum, auto
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Protocol
 import textwrap
 
@@ -13,7 +13,7 @@ import textwrap
 @dataclass(frozen=True, kw_only=True, slots=True)
 class NinjaVariable:
     key: str
-    value: str | Path
+    value: str | PurePath
 
 
 class NinjaRuleDeps(StrEnum):
@@ -38,14 +38,14 @@ class NinjaRule:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class NinjaBuild:
-    outputs: list[str | Path] = field(default_factory=list)
+    outputs: list[str | PurePath] = field(default_factory=list)
     rule: str
-    inputs: list[str | Path] = field(default_factory=list)
-    implicit: list[str | Path] = field(default_factory=list)
-    validation: list[str | Path] = field(default_factory=list)
-    order_only: list[str | Path] = field(default_factory=list)
-    implicit_outputs: list[str | Path] = field(default_factory=list)
-    variables: dict[str, str | Path] = field(default_factory=dict)
+    inputs: list[str | PurePath] = field(default_factory=list)
+    implicit: list[str | PurePath] = field(default_factory=list)
+    validation: list[str | PurePath] = field(default_factory=list)
+    order_only: list[str | PurePath] = field(default_factory=list)
+    implicit_outputs: list[str | PurePath] = field(default_factory=list)
+    variables: dict[str, str | PurePath] = field(default_factory=dict)
 
 
 class NinjaWriter:
@@ -96,13 +96,13 @@ class NinjaWriter:
         self.width = width
 
     @staticmethod
-    def _escape(value: str | Path) -> str:
+    def _escape(value: str | PurePath) -> str:
         """
         Escape a value for Ninja syntax.
 
         Parameters
         ----------
-        value : str | Path
+        value : str | PurePath
 
         Returns
         -------
@@ -243,14 +243,14 @@ class NinjaWriter:
         for line in wrapped_comment:
             self.lines.append(f"# {line}")
 
-    def variable(self, key: str, value: str | Path) -> None:
+    def variable(self, key: str, value: str | PurePath) -> None:
         """
         Declare a Ninja variable.
 
         Parameters
         ----------
         key : str
-        value : str | Path
+        value : str | PurePath
         """
         self._write(f"{key} = {self._escape(value)}")
 
@@ -309,35 +309,35 @@ class NinjaWriter:
 
     def build(
         self,
-        outputs: list[str | Path],
+        outputs: list[str | PurePath],
         rule: str,
-        inputs: list[str | Path] | None = None,
-        implicit: list[str | Path] | None = None,
-        order_only: list[str | Path] | None = None,
-        validation: list[str | Path] | None = None,
-        implicit_outputs: list[str | Path] | None = None,
-        variables: dict[str, str | Path] | None = None,
+        inputs: list[str | PurePath] | None = None,
+        implicit: list[str | PurePath] | None = None,
+        order_only: list[str | PurePath] | None = None,
+        validation: list[str | PurePath] | None = None,
+        implicit_outputs: list[str | PurePath] | None = None,
+        variables: dict[str, str | PurePath] | None = None,
     ) -> None:
         """
         Declare a Ninja build statement.
 
         Parameters
         ----------
-        outputs : list[str | Path]
+        outputs : list[str | PurePath]
             Explicit outputs.
         rule : str
             Rule name.
-        inputs : list[str | Path] | None (optional)
+        inputs : list[str | PurePath] | None (optional)
             Explicit inputs.
-        implicit : list[str | Path] | None (optional)
+        implicit : list[str | PurePath] | None (optional)
             Implicit dependencies (after `|`).
-        order_only : list[str | Path] | None (optional)
+        order_only : list[str | PurePath] | None (optional)
             Order-only dependencies (after `||`).
-        validation : list[str | Path] | None (optional)
+        validation : list[str | PurePath] | None (optional)
             Validation dependencies (after `|@`)
-        implicit_outputs : list[str | Path] | None (optional)
+        implicit_outputs : list[str | PurePath] | None (optional)
             Additional outputs (after `|`, before `:`).
-        variables : dict[str, str | Path] | None (optional)
+        variables : dict[str, str | PurePath] | None (optional)
             Per-build variables.
         """
         out = [self._escape(x) for x in outputs]
@@ -367,23 +367,23 @@ class NinjaWriter:
 
         self._write()
 
-    def include(self, path: Path) -> None:
+    def include(self, path: PurePath) -> None:
         """
         Include another Ninja file.
 
         Parameters
         ----------
-        path : Path
+        path : PurePath
         """
         self._write(f"include {self._escape(path)}")
 
-    def subninja(self, path: Path) -> None:
+    def subninja(self, path: PurePath) -> None:
         """
         Include a subninja file.
 
         Parameters
         ----------
-        path : Path
+        path : PurePath
         """
         self._write(f"subninja {self._escape(path)}")
 
