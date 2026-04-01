@@ -9,39 +9,37 @@ from pathlib import Path
 import subprocess
 import typing as T
 
+from ..builder.ninja import (
+    NinjaBuild,
+    NinjaBuilderProtocol,
+    NinjaFile,
+    NinjaVariable,
+)
 from ..utils.environment import find_program
 
 
-def _escape_path(path: str) -> str:
-    """Escape ninja build syntax separators and tokens."""
-    # Escape $ first, then other, please keep this order.
-    return path.replace("$", "$$").replace(" ", "$ ").replace(":", "$:")
+class NinjaDyndepBuilder(NinjaBuilderProtocol):
+    def __init__(self) -> None:
+        self.name = "dyndep"
+        self._builds: list[NinjaBuild] = list()
 
+    @classmethod
+    def __ninja_variables__(cls):
+        yield NinjaVariable(key="ninja_dyndep_version", value="1")
 
-def _add_build_target_dyndep(
-    target: str, implicit_inputs: set[str], implicit_output: set[str], out: T.Any
-) -> None:
-    """Add dynamically generated implicit ins/outs for a given target.
+    def __ninja_builds__(self):
+        yield from self._builds
 
-    ..notes: The target must exists in the top level build.ninja file
-
-    Ninja dyndep are formatted as follow:
-     - build <target> [| [<implicit outs> ...]]: dyndep [| [<implicit ins>...] ]
-    """
-    out.write(f"build {target}")
-    if implicit_output:
-        out.write(" |")
-    for f in implicit_output:
-        out.write(f" $\n {_escape_path(f)}")
-
-    out.write(": dyndep")
-
-    if implicit_inputs:
-        out.write(" |")
-    for f in implicit_inputs:
-        out.write(f" $\n {_escape_path(f)}")
-    out.write("\n")
-    out.write("  restat = 1\n")
+    def add_dyndep(self, output, implicit, implicit_outputs) -> None:
+        self._builds.append(
+            NinjaBuild(
+                outputs=[output],
+                rule="dyndep",
+                implicit=implicit,
+                implicit_outputs=implicit_outputs,
+                variables={"restat": "1"},
+            )
+        )
 
 
 def _gen_ninja_dyndep_file(
@@ -58,7 +56,7 @@ def _gen_ninja_dyndep_file(
     compile_target = f"{package}_compile.stamp"
     install_target = f"{package}_install.stamp"
 
-    buildsys_files = [_escape_path(p) for p in introspect["buildsystem_files"]]
+    buildsys_files = introspect["buildsystem_files"]
 
     sources = []
     filenames = []
@@ -95,14 +93,11 @@ def _gen_ninja_dyndep_file(
             _path = stagingdir.joinpath(_path)
         install_implicit_outputs.add(str(_path))
 
-    with output.open("w") as dyndep:
-        dyndep.write("ninja_dyndep_version = 1\n")
-        _add_build_target_dyndep(
-            compile_target, compile_implicit_inputs, compile_implicit_outputs, dyndep
-        )
-        _add_build_target_dyndep(
-            install_target, install_implicit_inputs, install_implicit_outputs, dyndep
-        )
+    builder = NinjaDyndepBuilder()
+    builder.add_dyndep(compile_target, compile_implicit_inputs, compile_implicit_outputs)
+    builder.add_dyndep(install_target, install_implicit_inputs, install_implicit_outputs)
+    nf = NinjaFile([builder])
+    nf.write(output)
 
 
 def run_meson_package_dyndep(
