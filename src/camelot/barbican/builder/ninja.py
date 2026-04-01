@@ -1,0 +1,583 @@
+# SPDX-FileCopyrightText: 2026 H2Lab
+#
+# SPDX-License-Identifier: Apache-2.0
+
+from collections.abc import Iterator
+from dataclasses import dataclass, field, asdict
+from enum import StrEnum, auto
+from pathlib import Path
+from typing import Protocol
+import textwrap
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class NinjaVariable:
+    key: str
+    value: str | Path
+
+
+class NinjaRuleDeps(StrEnum):
+    GCC = auto()
+    MSVC = auto()
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class NinjaRule:
+    name: str
+    command: str
+    description: str
+    depfile: str | None = None
+    deps: NinjaRuleDeps | None = None
+    generator: bool = False
+    pool: str | None = None
+    restat: bool = False
+    rspfile: str | None = None
+    rspfile_content: str | None = None
+    msvc_deps_prefix: str | None = None
+
+
+@dataclass(frozen=True, kw_only=True, slots=True)
+class NinjaBuild:
+    outputs: list[str | Path] = field(default_factory=list)
+    rule: str
+    inputs: list[str | Path] = field(default_factory=list)
+    implicit: list[str | Path] = field(default_factory=list)
+    validation: list[str | Path] = field(default_factory=list)
+    order_only: list[str | Path] = field(default_factory=list)
+    implicit_outputs: list[str | Path] = field(default_factory=list)
+    variables: dict[str, str | Path] = field(default_factory=dict)
+
+
+class NinjaWriter:
+    """
+    Helper class to generate Ninja build files.
+
+    Provides a high-level API for emitting valid and readable Ninja syntax,
+    including support for:
+
+    - variables
+    - rules (with validation)
+    - pools
+    - build statements
+    - implicit outputs
+    - implicit dependencies
+    - order-only dependencies
+    - includes and subninja
+
+    Parameters
+    ----------
+    width : int, optional
+        Maximum line width before wrapping (default is 100).
+
+    Notes
+    -----
+    - Automatically escapes special characters (`$`, space, `:`)
+    - Wraps long lines using Ninja continuation (`$`)
+    - Validates rule keys against Ninja specification
+    """
+
+    _ALLOWED_RULE_KEYS = {
+        "command",
+        "description",
+        "depfile",
+        "deps",
+        "generator",
+        "pool",
+        "restat",
+        "rspfile",
+        "rspfile_content",
+        "msvc_deps_prefix",
+    }
+
+    _ESCAPE_NEW_LINE = " $"
+
+    def __init__(self, width: int = 100) -> None:
+        self.lines: list[str] = []
+        self.width = width
+
+    @staticmethod
+    def _escape(value: str | Path) -> str:
+        """
+        Escape a value for Ninja syntax.
+
+        Parameters
+        ----------
+        value : str | Path
+
+        Returns
+        -------
+        str
+        """
+        return str(value).replace("$", "$$").replace(" ", "$ ").replace(":", "$:")
+
+    def _wrap(self, line: str) -> list[str]:
+        """
+        Wrap a line if it exceeds the configured width.
+
+        The line is wrapped on the first space that is not escaped in order to keep the generated
+        file human readable.
+
+        Parameters
+        ----------
+        line : str
+
+        Returns
+        -------
+        list[str]
+        """
+        if len(line) <= self.width:
+            return [line]
+
+        def space_is_escaped(text: str, pos: int) -> bool:
+            """Return True if the space at pos in given text is escaped.
+
+            In ninja syntax, space can be escaped (e.g. in windows path) with `$` escape character.
+            Note that escape character can be used to escape itself.
+            Thus, an escaped space, is a space that is preceded by a odd number of `$`.
+
+            Parameters
+            ----------
+            text: str
+            pos: int
+
+            Returns
+            -------
+            bool
+            """
+            idx = pos - 1
+            cnt = 0
+            while idx > 0 and text[idx] == "$":
+                idx -= 1
+                cnt += 1
+            return cnt % 2 == 1
+
+        def space_pos_before_line_width(text: str) -> int:
+            """Return the last unescaped space before line width.
+
+            Parameters
+            ----------
+            text: str
+
+            Returns
+            -------
+            int
+                unescaped space pos, -1 if not found
+            """
+            # reverse search from width minus escape sequence
+            pos = self.width - len(self._ESCAPE_NEW_LINE)
+            while True:
+                pos = text.rfind(" ", 0, pos)
+                # if pos is negative one, there is no match at all
+                # if space is not escaped, there is a match
+                # in both case, terminate iteration and return
+                # otherwise, look for another space
+                if pos < 0 or not space_is_escaped(text, pos):
+                    break
+            return pos
+
+        def space_pos_after_line_width(text: str) -> int:
+            """Return the first unescaped space after line width.
+
+            Parameters
+            ----------
+            text: str
+
+            Returns
+            -------
+            int
+                unescaped space pos, -1 if not found
+            """
+            # search from width minus escape sequence
+            # extra minus one is hackish here because find will start at previous pos + 1
+            pos = self.width - len(self._ESCAPE_NEW_LINE) - 1
+            while True:
+                pos = text.find(" ", pos + 1)
+                # if pos is negative one, there is no match at all
+                # if space is not escaped, there is a match
+                # in both case, terminate iteration and return
+                # otherwise, look for another space
+                if pos < 0 or not space_is_escaped(text, pos):
+                    break
+            return pos
+
+        parts: list[str] = []
+        indent: int = len(line) - len(line.lstrip())
+
+        # do not try to wrap on indentation (i.e. leading) space
+        min_pos: int = indent
+
+        while len(line) > self.width:
+            pos = space_pos_before_line_width(line)
+            if pos < min_pos:
+                pos = space_pos_after_line_width(line)
+
+            # if a valid position is found, wrap line here
+            if pos >= min_pos:
+                parts.append(line[:pos] + self._ESCAPE_NEW_LINE)
+                # update remaining text to wrap w/ extra indentation
+                line = " " * (indent + 2) + line[pos + 1 :]
+                # wrapped line are indented
+                min_pos = indent + 2
+            else:
+                # if pos negative, the remaining cannot be wrapped
+                break
+
+        parts.append(line)
+        return parts
+
+    def _write(self, text: str = "") -> None:
+        for line in self._wrap(text):
+            self.lines.append(line)
+
+    def comment(self, text: str) -> None:
+        """
+        Add a comment block.
+
+        Parameters
+        ----------
+        text : str
+        """
+        wrapped_comment = textwrap.wrap(
+            text, self.width - 2, break_long_words=False, break_on_hyphens=False
+        )
+        for line in wrapped_comment:
+            self.lines.append(f"# {line}")
+
+    def variable(self, key: str, value: str | Path) -> None:
+        """
+        Declare a Ninja variable.
+
+        Parameters
+        ----------
+        key : str
+        value : str | Path
+        """
+        self._write(f"{key} = {self._escape(value)}")
+
+    def pool(self, name: str, depth: int) -> None:
+        """
+        Declare a Ninja pool.
+
+        Parameters
+        ----------
+        name : str
+            Pool name.
+        depth : int
+            Maximum parallel jobs.
+
+        Raises
+        ------
+        ValueError
+            If depth <= 0.
+        """
+        if depth <= 0:
+            raise ValueError("Pool depth must be > 0")
+
+        self._write(f"pool {name}")
+        self._write(f"  depth = {depth}")
+        self._write()
+
+    def rule(self, name: str, **kwargs: str) -> None:
+        """
+        Declare a Ninja rule with validation.
+
+        Parameters
+        ----------
+        name : str
+        **kwargs : str
+            Rule attributes.
+
+        Raises
+        ------
+        ValueError
+            If invalid rule keys are provided.
+        """
+        invalid = set(kwargs) - self._ALLOWED_RULE_KEYS
+        if invalid:
+            raise ValueError(
+                f"Invalid Ninja rule keys: {invalid}. "
+                f"Allowed keys: {sorted(self._ALLOWED_RULE_KEYS)}"
+            )
+
+        self._write(f"rule {name}")
+        for k, v in kwargs.items():
+            if isinstance(v, bool) and v:
+                self._write(f"  {k} = 1")
+            elif v:
+                self._write(f"  {k} = {v}")
+        self._write()
+
+    def build(
+        self,
+        outputs: list[str | Path],
+        rule: str,
+        inputs: list[str | Path] | None = None,
+        implicit: list[str | Path] | None = None,
+        order_only: list[str | Path] | None = None,
+        validation: list[str | Path] | None = None,
+        implicit_outputs: list[str | Path] | None = None,
+        variables: dict[str, str | Path] | None = None,
+    ) -> None:
+        """
+        Declare a Ninja build statement.
+
+        Parameters
+        ----------
+        outputs : list[str | Path]
+            Explicit outputs.
+        rule : str
+            Rule name.
+        inputs : list[str | Path] | None (optional)
+            Explicit inputs.
+        implicit : list[str | Path] | None (optional)
+            Implicit dependencies (after `|`).
+        order_only : list[str | Path] | None (optional)
+            Order-only dependencies (after `||`).
+        validation : list[str | Path] | None (optional)
+            Validation dependencies (after `|@`)
+        implicit_outputs : list[str | Path] | None (optional)
+            Additional outputs (after `|`, before `:`).
+        variables : dict[str, str | Path] | None (optional)
+            Per-build variables.
+        """
+        out = [self._escape(x) for x in outputs]
+        inp = [self._escape(x) for x in inputs] if inputs is not None else []
+
+        if implicit:
+            inp.append("|")
+            inp.extend([self._escape(x) for x in implicit])
+
+        if order_only:
+            inp.append("||")
+            inp.extend([self._escape(x) for x in order_only])
+
+        if validation:
+            inp.append("|@")
+            inp.extend([self._escape(x) for x in validation])
+
+        if implicit_outputs:
+            out.append("|")
+            out.extend([self._escape(x) for x in implicit_outputs])
+
+        self._write(f"build {' '.join(out)}: {rule} {' '.join(inp)}")
+
+        if variables:
+            for k, v in variables.items():
+                self._write(f"  {k} = {self._escape(v)}")
+
+        self._write()
+
+    def include(self, path: Path) -> None:
+        """
+        Include another Ninja file.
+
+        Parameters
+        ----------
+        path : Path
+        """
+        self._write(f"include {self._escape(path)}")
+
+    def subninja(self, path: Path) -> None:
+        """
+        Include a subninja file.
+
+        Parameters
+        ----------
+        path : Path
+        """
+        self._write(f"subninja {self._escape(path)}")
+
+    def newline(self) -> None:
+        """Insert an empty line."""
+        self._write()
+
+    def render(self) -> str:
+        """
+        Render the Ninja file.
+
+        Note
+        ----
+        The rendered string ends with a newline characters in order to be Posix text file compliant
+
+        Returns
+        -------
+        str
+        """
+        return "\n".join(self.lines) + "\n"
+
+
+class NinjaVariablesProtocol(Protocol):
+    """Protocol for ninja variable builder."""
+
+    @classmethod
+    def __ninja_variables__(cls) -> Iterator[NinjaVariable]:
+        """Ninja variables generator.
+
+        Yields
+        ------
+        NinjaVariable
+            The next ninja variable
+
+        Note
+        ----
+            Default implementation is an empty generator
+        """
+        yield from ()
+
+
+class NinjaRulesProtocol(Protocol):
+    """Protocol for ninja rules builder."""
+
+    @classmethod
+    def __ninja_rules__(cls) -> Iterator[NinjaRule]:
+        """Ninja rules generator.
+
+        Yields
+        ------
+        NinjaRule
+            The next ninja rule
+
+        Note
+        ----
+            Default implementation is an empty generator
+        """
+        yield from ()
+
+
+class NinjaBuildsProtocol(Protocol):
+    """Protocol for ninja build builder."""
+
+    def __ninja_builds__(self) -> Iterator[NinjaBuild]:
+        """Ninja build generator.
+
+        Yields
+        ------
+        NinjaBuild
+            The next ninja build
+
+        Note
+        ----
+            Default implementation is an empty generator
+        """
+        yield from ()
+
+
+class NinjaBuilderProtocol(
+    NinjaVariablesProtocol, NinjaRulesProtocol, NinjaBuildsProtocol, Protocol
+):
+    """
+    Protocol for Ninja builders.
+
+    Ninja builders (e.g. Package builder or internal build step) are likely implementing
+    all previous builder protocol (i.e. Variables, Rules and Builds).
+
+    Attributes
+    ----------
+    name : str
+        Unique builder name.
+    """
+
+    name: str
+
+
+class NinjaFile:
+    """
+    Orchestrates Ninja file generation.
+
+    Parameters
+    ----------
+    builders : list[NinjaBuilderProtocol]
+        Builder instances.
+    """
+
+    def __init__(self, builders: list[NinjaBuilderProtocol]) -> None:
+        self.builders = builders
+        self.types: set[type[NinjaBuilderProtocol]] = set()
+        self._validate()
+
+    def _validate(self) -> None:
+        """Validate ninja file builders.
+
+        Raises
+        ------
+        ValueError
+            If duplicate builder names exist.
+        """
+        seen: set[str] = set()
+        for b in self.builders:
+            if b.name in seen:
+                raise ValueError(f"Duplicate builder name: {b.name}")
+            if type(b) not in self.types:
+                self.types.add(type(b))
+            seen.add(b.name)
+
+    def _collect_rules(self) -> list[NinjaRule]:
+        """
+        Collect and validate Ninja rules across builder types.
+
+        It is an error to have duplicate rule name.
+        Error is silenced if rules are identical.
+
+        Returns
+        -------
+        list[NinjaRule]
+
+        Raises
+        ------
+        ValueError
+            If duplicate rule names are detected.
+        """
+        rules: dict[str, NinjaRule] = {}
+
+        for t in self.types:
+            for rule in t.__ninja_rules__():
+                if rule.name in rules:
+                    if asdict(rules[rule.name]) != asdict(rule):
+                        raise ValueError(
+                            f"Duplicate Ninja rule detected: '{rule.name}' from {t.__name__}"
+                        )
+                    continue
+                rules[rule.name] = rule
+
+        return list(rules.values())
+
+    def generate(self) -> str:
+        """
+        Generate Ninja file content.
+
+        Returns
+        -------
+        str
+        """
+        nw = NinjaWriter()
+
+        nw.comment("Generated by Barbican Ninja File builder")
+        nw.comment("** DO NOT EDIT **")
+        nw.newline()
+
+        nw.comment("variables")
+        for v in [v for t in self.types for v in t.__ninja_variables__()]:
+            nw.variable(**asdict(v))
+        nw.newline()
+
+        nw.comment("rules")
+        for r in self._collect_rules():
+            nw.rule(**asdict(r))
+        nw.newline()
+
+        nw.comment("build")
+        for b in [b for builder in self.builders for b in builder.__ninja_builds__()]:
+            nw.build(**asdict(b))
+        nw.newline()
+
+        return nw.render()
+
+    def write(self, path: Path = Path("build.ninja")) -> None:
+        """
+        Write Ninja file.
+
+        Parameters
+        ----------
+        path : Path, optional
+        """
+        path.write_text(self.generate(), encoding="utf-8")
