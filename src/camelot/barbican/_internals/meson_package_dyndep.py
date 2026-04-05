@@ -20,8 +20,11 @@ from ..utils.environment import find_program
 
 class NinjaDyndepBuilder(NinjaBuilderProtocol):
     def __init__(self) -> None:
-        self.name = "dyndep"
         self._builds: list[NinjaBuild] = list()
+
+    @property
+    def name(self) -> str:
+        return "dyndep"
 
     @classmethod
     def __ninja_variables__(cls):

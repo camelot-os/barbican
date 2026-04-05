@@ -497,13 +497,14 @@ class NinjaBuilderProtocol(
     Ninja builders (e.g. Package builder or internal build step) are likely implementing
     all previous builder protocol (i.e. Variables, Rules and Builds).
 
-    Attributes
-    ----------
+    Methods
+    -------
     name : str
         Unique builder name.
     """
 
-    name: str
+    @property
+    def name(self) -> str: ...
 
 
 class NinjaFile:

@@ -261,12 +261,20 @@ class TestNinjaWriter:
 
 class EmptyBuilder(NinjaBuilderProtocol):
     def __init__(self, name: str):
-        self.name = name
+        self._name: str = name
+
+    @property
+    def name(self) -> str:
+        return self._name
 
 
 class DummyBuilder(NinjaBuilderProtocol):
     def __init__(self, name: str):
-        self.name = name
+        self._name: str = name
+
+    @property
+    def name(self) -> str:
+        return self._name
 
     @classmethod
     def __ninja_variables__(cls):
@@ -290,7 +298,11 @@ class DummyBuilder(NinjaBuilderProtocol):
 
 class DummyBuilderImplicit:
     def __init__(self, name: str):
-        self.name = name
+        self._name: str = name
+
+    @property
+    def name(self) -> str:
+        return self._name
 
     @classmethod
     def __ninja_variables__(cls):
