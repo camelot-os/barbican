@@ -4,6 +4,7 @@
 
 import pytest
 from pathlib import PureWindowsPath, PurePosixPath
+from dataclasses import asdict
 
 from camelot.barbican.builder.ninja import (
     NinjaWriter,
@@ -349,3 +350,10 @@ class TestNinjaFile:
         nf = NinjaFile([EmptyBuilder("empty")])
         nf.write(f)
         assert f.read_text(encoding="utf-8") == nf.generate()
+
+    def test_ninja_build_dep(self):
+        build1 = NinjaBuild(outputs=["output1"], rule="rule1")
+        build2 = NinjaBuild(outputs=["output2"], rule="rule2", inputs=["input2", build1])
+        nw = NinjaWriter()
+        nw.build(**asdict(build2))
+        assert nw.render().splitlines()[0] == "build output2: rule2 input2 output1"

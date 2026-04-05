@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+from __future__ import annotations
+
 from collections.abc import Iterator
 from dataclasses import dataclass, field, asdict
 from enum import StrEnum, auto
@@ -40,10 +42,10 @@ class NinjaRule:
 class NinjaBuild:
     outputs: list[str | PurePath] = field(default_factory=list)
     rule: str
-    inputs: list[str | PurePath] = field(default_factory=list)
-    implicit: list[str | PurePath] = field(default_factory=list)
-    validation: list[str | PurePath] = field(default_factory=list)
-    order_only: list[str | PurePath] = field(default_factory=list)
+    inputs: list[str | PurePath | NinjaBuild] = field(default_factory=list)
+    implicit: list[str | PurePath | NinjaBuild] = field(default_factory=list)
+    validation: list[str | PurePath | NinjaBuild] = field(default_factory=list)
+    order_only: list[str | PurePath | NinjaBuild] = field(default_factory=list)
     implicit_outputs: list[str | PurePath] = field(default_factory=list)
     variables: dict[str, str | PurePath] = field(default_factory=dict)
 
@@ -311,10 +313,10 @@ class NinjaWriter:
         self,
         outputs: list[str | PurePath],
         rule: str,
-        inputs: list[str | PurePath] | None = None,
-        implicit: list[str | PurePath] | None = None,
-        order_only: list[str | PurePath] | None = None,
-        validation: list[str | PurePath] | None = None,
+        inputs: list[str | PurePath | dict] | None = None,
+        implicit: list[str | PurePath | dict] | None = None,
+        order_only: list[str | PurePath | dict] | None = None,
+        validation: list[str | PurePath | dict] | None = None,
         implicit_outputs: list[str | PurePath] | None = None,
         variables: dict[str, str | PurePath] | None = None,
     ) -> None:
@@ -327,33 +329,53 @@ class NinjaWriter:
             Explicit outputs.
         rule : str
             Rule name.
-        inputs : list[str | PurePath] | None (optional)
+        inputs : list[str | PurePath | dict] | None (optional)
             Explicit inputs.
-        implicit : list[str | PurePath] | None (optional)
+        implicit : list[str | PurePath | dict] | None (optional)
             Implicit dependencies (after `|`).
-        order_only : list[str | PurePath] | None (optional)
+        order_only : list[str | PurePath | dict] | None (optional)
             Order-only dependencies (after `||`).
-        validation : list[str | PurePath] | None (optional)
+        validation : list[str | PurePath | dict] | None (optional)
             Validation dependencies (after `|@`)
         implicit_outputs : list[str | PurePath] | None (optional)
             Additional outputs (after `|`, before `:`).
         variables : dict[str, str | PurePath] | None (optional)
             Per-build variables.
+
+        Note
+        ----
+        NinjaWrite is used internally by NinjaFile which unpack NinjaBuild dataclass with `**asdict`
+        asdict will recursively convert dataclass as dictionary and thus input deps as well.
+        Here, the right type for such a input deps is list[ str | PurePath | dict ].
+        The given dict is 'pack' as a NinjaBuild dataclass while formatted.
         """
+
+        def _format(elements: list[str | PurePath | dict]) -> list[str]:
+            data: list[str] = []
+            for elem in elements:
+                if isinstance(elem, dict):
+                    data.extend([self._escape(x) for x in NinjaBuild(**elem).outputs])
+                else:
+                    data.append(self._escape(elem))
+            return data
+
         out = [self._escape(x) for x in outputs]
-        inp = [self._escape(x) for x in inputs] if inputs is not None else []
+        inp: list[str] = []
+
+        if inputs:
+            inp.extend(_format(inputs))
 
         if implicit:
             inp.append("|")
-            inp.extend([self._escape(x) for x in implicit])
+            inp.extend(_format(implicit))
 
         if order_only:
             inp.append("||")
-            inp.extend([self._escape(x) for x in order_only])
+            inp.extend(_format(order_only))
 
         if validation:
             inp.append("|@")
-            inp.extend([self._escape(x) for x in validation])
+            inp.extend(_format(validation))
 
         if implicit_outputs:
             out.append("|")
