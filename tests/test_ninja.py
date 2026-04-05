@@ -233,6 +233,19 @@ class TestNinjaWriter:
         assert "  flags = -O2" == lines[1]
         assert "  opts = -Doption" == lines[2]
 
+    def test_build_with_variables_list(self):
+        nw = NinjaWriter()
+        nw.build(
+            outputs=["out"],
+            rule="cc",
+            variables={
+                "opts": ["-O2", "-mcpu=cortex-m33", "-mfloat-abi=soft"],
+            },
+        )
+
+        lines = nw.render().splitlines()
+        assert "  opts = -O2 -mcpu=cortex-m33 -mfloat-abi=soft" == lines[1]
+
     @pytest.mark.parametrize("data", include_data, ids=["str", "PosixPath", "WindowsPath"])
     def test_include(self, data):
         nw = NinjaWriter()

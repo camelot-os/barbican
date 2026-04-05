@@ -47,7 +47,7 @@ class NinjaBuild:
     validation: list[str | PurePath | NinjaBuild] = field(default_factory=list)
     order_only: list[str | PurePath | NinjaBuild] = field(default_factory=list)
     implicit_outputs: list[str | PurePath] = field(default_factory=list)
-    variables: dict[str, str | PurePath] = field(default_factory=dict)
+    variables: dict[str, str | PurePath | list] = field(default_factory=dict)
 
 
 class NinjaWriter:
@@ -318,7 +318,7 @@ class NinjaWriter:
         order_only: list[str | PurePath | dict] | None = None,
         validation: list[str | PurePath | dict] | None = None,
         implicit_outputs: list[str | PurePath] | None = None,
-        variables: dict[str, str | PurePath] | None = None,
+        variables: dict[str, str | PurePath | list] | None = None,
     ) -> None:
         """
         Declare a Ninja build statement.
@@ -339,7 +339,7 @@ class NinjaWriter:
             Validation dependencies (after `|@`)
         implicit_outputs : list[str | PurePath] | None (optional)
             Additional outputs (after `|`, before `:`).
-        variables : dict[str, str | PurePath] | None (optional)
+        variables : dict[str, str | PurePath | list] | None (optional)
             Per-build variables.
 
         Note
@@ -385,7 +385,11 @@ class NinjaWriter:
 
         if variables:
             for k, v in variables.items():
-                self._write(f"  {k} = {self._escape(v)}")
+                if isinstance(v, list):
+                    print(v)
+                    self._write(f"  {k} = {' '.join([self._escape(elem) for elem in v])}")
+                else:
+                    self._write(f"  {k} = {self._escape(v)}")
 
         self._write()
 
