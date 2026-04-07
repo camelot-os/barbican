@@ -582,17 +582,14 @@ class NinjaFile:
         nw.comment("** DO NOT EDIT **")
         nw.newline()
 
-        nw.comment("variables")
         for v in [v for t in self.types for v in t.__ninja_variables__()]:
             nw.variable(**asdict(v))
         nw.newline()
 
-        nw.comment("rules")
         for r in self._collect_rules():
             nw.rule(**asdict(r))
         nw.newline()
 
-        nw.comment("build")
         for b in [b for builder in self.builders for b in builder.__ninja_builds__()]:
             nw.build(**asdict(b))
         nw.newline()
