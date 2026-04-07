@@ -234,7 +234,7 @@ class Project:
             implicit=metadata + [self._kernel._package.as_dependency],
             variables={
                 "cmd": "kernel_fixup",
-                "args": f"{out} {inp} {' '.join(f"{m.outputs[0]}" for m in metadata)}",
+                "args": f"{out} {inp} {' '.join(str(m.outputs[0]) for m in metadata)}",
                 "description": "Kernel fixup",
             },
         )

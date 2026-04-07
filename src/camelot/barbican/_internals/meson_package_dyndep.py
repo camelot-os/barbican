@@ -118,7 +118,6 @@ def run_meson_package_dyndep(name: str, stagingdir: Path, dyndep: Path, introspe
     _gen_ninja_dyndep_file(name, package_introspection, stagingdir, dyndep)
 
 
-
 def argument_parser() -> ArgumentParser:
     parser = ArgumentParser()
     parser.add_argument("--name", type=str, action="store", help="package name")
