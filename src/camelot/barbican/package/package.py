@@ -226,6 +226,10 @@ class Package(ABC):
                 deps.extend(self._config["depends"])
             return deps
 
+    @property
+    def as_dependency(self) -> str:
+        return f"{self.name}_install.stamp"
+
     @classmethod
     def get_backend_factory(cls, backend: str) -> T.Type["Package"]:
         return cls.__backend_factories[Backend(backend)]

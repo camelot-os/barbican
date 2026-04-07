@@ -5,12 +5,14 @@
 import json
 import shutil
 
+from collections.abc import Iterator
 from functools import lru_cache
 from pathlib import Path
 
 from jinja2 import Environment, BaseLoader
 
 from .package import Package
+from ..builder.ninja import NinjaBuild, NinjaRule, NinjaVariable
 from ..utils.environment import ExeWrapper, find_program
 
 
@@ -142,6 +144,129 @@ class Cargo(Package):
     def __init__(self, name: str, parent_project, config_node: dict, type):
         super().__init__(name, parent_project, config_node, type)
 
+        _setup = NinjaBuild(
+            outputs=[f"{self.build_dir}/.cargo/config.toml"],
+            rule="internal",
+            variables={
+                "cmd": "cargo_config",
+                "args": (
+                    f"--rustargs-file={str(self._parent._kernel.rustargs)} "
+                    f"--target-file={str(self._parent._kernel.rust_target)} "
+                    '--extra-args="' + " ".join(self.build_options) + '" '
+                    f"{str(self.build_dir)}"
+                ),
+                "description": f"Setup {self.name}",
+            },
+            order_only=[f"{dep}_install.stamp" for dep in self.deps],
+        )
+
+        _setup_alias = NinjaBuild(
+            outputs=[f"{self.name}-setup"],
+            rule="phony",
+            inputs=[_setup],
+        )
+
+        _compile = NinjaBuild(
+            outputs=[f"{self.name}_compile.stamp"],
+            rule="cargo_compile",
+            variables={
+                "name": self.name,
+                "manifest": self.manifest,
+                "builddir": self.build_dir,
+                "env": f"config={self._dotconfig}",
+            },
+            implicit=[_setup],
+        )
+
+        _compile_alias = NinjaBuild(
+            outputs=[f"{self.name}-compile"],
+            rule="phony",
+            inputs=[_compile],
+        )
+
+        _install = NinjaBuild(
+            outputs=[f"{self.name}_install.stamp"],
+            rule="internal",
+            implicit=[_compile],
+            variables={
+                "cmd": "cargo_install",
+                "args": (
+                    "--suffix=.elf "
+                    f"--target-file={str(self._parent._kernel.rust_target)} "
+                    f"--stamp={self.name}_install.stamp "
+                    f"{str(self.build_dir)} "
+                    + " ".join((str(t.with_suffix("")) for t in self.installed_targets))
+                ),
+                "description": f"Install {self.name}",
+            },
+        )
+
+        _install_alias = NinjaBuild(
+            outputs=[f"{self.name}-install"],
+            rule="phony",
+            inputs=[_install],
+        )
+
+        _clean = NinjaBuild(
+            outputs=[f"{self.build_dir}/clean"],
+            rule="cargo_clean",
+            variables={
+                "name": self.name,
+                "manifest": self.manifest,
+                "builddir": self.build_dir,
+                "env": f"config={self._dotconfig}",
+                "stamps": list(_compile.outputs) + list(_install.outputs),
+            },
+        )
+
+        _clean_alias = NinjaBuild(outputs=[f"{self.name}-clean"], rule="phony", inputs=[_clean])
+
+        self._build_targets: list[NinjaBuild] = [
+            _setup,
+            _setup_alias,
+            _compile,
+            _compile_alias,
+            _install,
+            _install_alias,
+            _clean,
+            _clean_alias,
+        ]
+
+    @classmethod
+    def __ninja_variables__(cls) -> Iterator[NinjaVariable]:
+        yield from [
+            NinjaVariable(key="cargo", value=find_program("cargo")),
+        ]
+
+    @classmethod
+    def __ninja_rules__(cls) -> Iterator[NinjaRule]:
+        # Cargo setup and Cargo install use internal cmd rule
+        yield from [
+            NinjaRule(
+                name="cargo_compile",
+                description="Compile $name",
+                command=(
+                    "cd $builddir && "
+                    "$env $cargo build --manifest-path=$manifest --release && "
+                    "cd - && "
+                    "touch $out"
+                ),
+            ),
+            NinjaRule(
+                name="cargo_clean",
+                description="Clean $name",
+                command=(
+                    "cd $builddir && "
+                    "$env $cargo clean --manifest-path=$manifest --release && "
+                    "cd - && "
+                    "rm $stamps"
+                ),
+            ),
+        ]
+
+    def __ninja_builds__(self) -> Iterator[NinjaBuild]:
+        yield from self._build_targets
+
     @property
     def build_options(self) -> list[str]:
         opts = list()
@@ -156,7 +281,7 @@ class Cargo(Package):
     @property
     @lru_cache
     def manifest(self) -> Path:
-        return (self.src_dir / "Cargo.toml").resolve(strict=True)
+        return (self.src_dir / "Cargo.toml").resolve()
 
     def deploy_local(self, registry: LocalRegistry, config: Config) -> None:
         # TODO: fetch version from cargo manifest
