@@ -28,6 +28,12 @@ def argument_parser() -> ArgumentParser:
         default="release",
         help="cargo build profile",
     )
+    parser.add_argument(
+        "--stamp",
+        action="store",
+        type=Path,
+        help="stamp file path",
+    )
 
     return parser
 
@@ -37,3 +43,4 @@ def run(argv: list[str]) -> None:
     target: str = args.target_file.read_text().splitlines()[0]
     from_dir: Path = (args.from_dir / target / args.profile).resolve(strict=True)
     run_install(from_dir, args.files, args.suffix)
+    args.stamp.touch(exist_ok=True)
