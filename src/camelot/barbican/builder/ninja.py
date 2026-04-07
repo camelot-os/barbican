@@ -48,6 +48,25 @@ class NinjaBuild:
     order_only: Sequence[str | PurePath | NinjaBuild] = field(default_factory=list)
     implicit_outputs: Sequence[str | PurePath] = field(default_factory=list)
     variables: dict[str, str | PurePath | list] = field(default_factory=dict)
+    build_by_default: bool = False
+
+    @staticmethod
+    def dict_factory(x):
+        """
+        Generate dict from dataclass.
+
+        Not all fields are relevant while using NinjaBuild dataclass as dict.
+        `build_by_default` is used internally at NinjaFile generation to feed
+        default targets list if set.
+
+        All others mirror :py:meth:`NinjaWriter.build` arguments.
+        """
+        exclude_fields = ("build_by_default",)
+        return {k: v for (k, v) in x if k not in exclude_fields}
+
+    def asdict(self) -> dict:
+        """Return the instance as dictionary using the class defined dict factory."""
+        return asdict(self, dict_factory=self.dict_factory)
 
 
 class NinjaWriter:
@@ -413,6 +432,23 @@ class NinjaWriter:
         """
         self._write(f"subninja {self._escape(path)}")
 
+    def default(self, targets: Sequence[str | PurePath]) -> None:
+        """
+        Define default build target(s).
+
+        Parameters
+        ----------
+        targets : Sequence[str | PurePath]
+
+        Raises
+        ------
+        ValueError
+            Id targets is empty.
+        """
+        if len(targets) == 0:
+            raise ValueError("empty default build targets")
+        self._write(f"default {' '.join([self._escape(t) for t in targets])}")
+
     def newline(self) -> None:
         """Insert an empty line."""
         self._write()
@@ -590,9 +626,15 @@ class NinjaFile:
             nw.rule(**asdict(r))
         nw.newline()
 
+        default_targets: list[str | PurePath] = []
         for b in [b for builder in self.builders for b in builder.__ninja_builds__()]:
-            nw.build(**asdict(b))
+            nw.build(**(b.asdict()))
+            if b.build_by_default:
+                default_targets.extend(b.outputs)
         nw.newline()
+
+        if default_targets:
+            nw.default(default_targets)
 
         return nw.render()
 

@@ -4,7 +4,6 @@
 
 import pytest
 from pathlib import PureWindowsPath, PurePosixPath
-from dataclasses import asdict
 
 from camelot.barbican.builder.ninja import (
     NinjaWriter,
@@ -258,6 +257,24 @@ class TestNinjaWriter:
         nw.subninja(data)
         assert nw.render().splitlines()[0] == f"subninja {data}"
 
+    def test_default_target_empty(self):
+        nw = NinjaWriter()
+        with pytest.raises(ValueError):
+            nw.default([])
+
+    @pytest.mark.parametrize("data", include_data, ids=["str", "PosixPath", "WindowsPath"])
+    def test_default_target(self, data):
+        nw = NinjaWriter()
+        nw.default([data])
+        assert nw.render().splitlines()[0] == f"default {data}"
+
+    def test_default_target_list(self):
+        nw = NinjaWriter()
+        nw.default(self.include_data)
+        assert (
+            nw.render().splitlines()[0] == f"default {' '.join(str(i) for i in self.include_data)}"
+        )
+
 
 class EmptyBuilder(NinjaBuilderProtocol):
     def __init__(self, name: str):
@@ -380,5 +397,19 @@ class TestNinjaFile:
         build1 = NinjaBuild(outputs=["output1"], rule="rule1")
         build2 = NinjaBuild(outputs=["output2"], rule="rule2", inputs=["input2", build1])
         nw = NinjaWriter()
-        nw.build(**asdict(build2))
+        nw.build(**(build2.asdict()))
         assert nw.render().splitlines()[0] == "build output2: rule2 input2 output1"
+
+    @pytest.mark.parametrize("Builder", [DummyBuilder, DummyBuilderImplicit])
+    def test_ninja_build_default(self, Builder):
+        class BuilderWithDefaultTarget(Builder):
+            def __ninja_builds__(self):
+                yield NinjaBuild(
+                    outputs=["output_build_by_default"],
+                    rule="dummy",
+                    build_by_default=True,
+                )
+
+        # XXX: default statement is assumed to be the last line of generated ninja build file
+        default = NinjaFile([BuilderWithDefaultTarget("dummy")]).generate().splitlines()[-1]
+        assert default == "default output_build_by_default"
