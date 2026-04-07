@@ -6,7 +6,6 @@
 from argparse import ArgumentParser
 import json
 from pathlib import Path
-import subprocess
 import typing as T
 
 from ..builder.ninja import (
@@ -15,7 +14,6 @@ from ..builder.ninja import (
     NinjaFile,
     NinjaVariable,
 )
-from ..utils.environment import find_program
 
 
 class NinjaDyndepBuilder(NinjaBuilderProtocol):
@@ -103,9 +101,7 @@ def _gen_ninja_dyndep_file(
     nf.write(output)
 
 
-def run_meson_package_dyndep(
-    name: str, builddir: Path, stagingdir: Path, dyndep: Path, outfile: Path
-) -> None:
+def run_meson_package_dyndep(name: str, stagingdir: Path, dyndep: Path, introspect: Path) -> None:
     """Generate a ninja dynamic dependencies file for a meson package.
 
     This will populated implicit inputs and outputs of the given meson package
@@ -118,14 +114,9 @@ def run_meson_package_dyndep(
 
     This command generate a ninja dyndep file for compile and install target
     """
-    meson = find_program("meson")
-    cmdline = [meson, "introspect", "--all", "-i", str(builddir.resolve(strict=True))]
-    proc_return = subprocess.run(cmdline, check=True, capture_output=True)
-    package_introspection = json.loads(proc_return.stdout)
-
+    package_introspection = json.loads(introspect.read_text(encoding="utf-8"))
     _gen_ninja_dyndep_file(name, package_introspection, stagingdir, dyndep)
-    with outfile.open("w") as out:
-        out.write(json.dumps(package_introspection, indent=4))
+
 
 
 def argument_parser() -> ArgumentParser:
@@ -138,7 +129,6 @@ def argument_parser() -> ArgumentParser:
         required=True,
         help="save meson package introspection data to file (json formatted)",
     )
-    parser.add_argument("builddir", type=Path, help="package builddir")
     parser.add_argument("stagingdir", type=Path, help="package stagingdir")
     parser.add_argument("dyndep", type=Path, help="dynamic dependencies file")
 
@@ -148,4 +138,4 @@ def argument_parser() -> ArgumentParser:
 def run(argv: list[str]) -> None:
     """Execute meson package dyndep internal command."""
     args = argument_parser().parse_args(argv)
-    run_meson_package_dyndep(args.name, args.builddir, args.stagingdir, args.dyndep, args.json)
+    run_meson_package_dyndep(args.name, args.stagingdir, args.dyndep, args.json)
