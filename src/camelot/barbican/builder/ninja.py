@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass, field, asdict
 from enum import StrEnum, auto
 from pathlib import Path, PurePath
@@ -40,13 +40,13 @@ class NinjaRule:
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class NinjaBuild:
-    outputs: list[str | PurePath] = field(default_factory=list)
+    outputs: Sequence[str | PurePath] = field(default_factory=list)
     rule: str
-    inputs: list[str | PurePath | NinjaBuild] = field(default_factory=list)
-    implicit: list[str | PurePath | NinjaBuild] = field(default_factory=list)
-    validation: list[str | PurePath | NinjaBuild] = field(default_factory=list)
-    order_only: list[str | PurePath | NinjaBuild] = field(default_factory=list)
-    implicit_outputs: list[str | PurePath] = field(default_factory=list)
+    inputs: Sequence[str | PurePath | NinjaBuild] = field(default_factory=list)
+    implicit: Sequence[str | PurePath | NinjaBuild] = field(default_factory=list)
+    validation: Sequence[str | PurePath | NinjaBuild] = field(default_factory=list)
+    order_only: Sequence[str | PurePath | NinjaBuild] = field(default_factory=list)
+    implicit_outputs: Sequence[str | PurePath] = field(default_factory=list)
     variables: dict[str, str | PurePath | list] = field(default_factory=dict)
 
 
