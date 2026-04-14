@@ -43,6 +43,7 @@ napoleon_attr_annotations = True
 autoapi_dirs = ["../src/camelot"]
 autoapi_add_toctree_entry = False
 autoapi_python_use_implicit_namespaces = True
+autoapi_template_dir = "_templates/autoapi"
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
