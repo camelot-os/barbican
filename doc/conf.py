@@ -1,4 +1,9 @@
+import os
+import sys
 from importlib import metadata
+
+# Make local extensions discoverable
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "_ext"))
 
 # General information about the project.
 project = "camelot.barbican"
@@ -26,6 +31,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "autoapi.extension",
     "sphinxarg.ext",
+    "singlehtml_refuri_fix",
 ]
 
 # Napoleon extension configuration
