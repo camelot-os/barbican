@@ -57,13 +57,13 @@ def _patch_builder(app: Sphinx) -> None:
     if app.builder.name != "simplepdf":
         return
 
-    original_toctree_fix = app.builder._toctree_fix
+    original_toctree_fix = app.builder._toctree_fix  # type: ignore[attr-defined]
 
     def _patched_toctree_fix(html: str) -> str:
         html = _DOUBLE_HASH_RE.sub(r'href="\1"', html)
         return original_toctree_fix(html)
 
-    app.builder._toctree_fix = _patched_toctree_fix
+    app.builder._toctree_fix = _patched_toctree_fix  # type: ignore[attr-defined]
 
 
 def setup(app: Sphinx) -> dict[str, Any]:
