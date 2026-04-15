@@ -72,6 +72,11 @@ class SchemaDocumenter(Documenter):
     def import_object(self, raiseerror: bool = False) -> bool:
         """Load the JSON Schema from the configured registry.
 
+        Parameters
+        ----------
+        raiseerror : bool
+            Ignored; kept for compatibility with the base class signature.
+
         Returns
         -------
         bool

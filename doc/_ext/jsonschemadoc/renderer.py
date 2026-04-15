@@ -31,7 +31,7 @@ def uri_to_node_id(uri: str) -> str:
     """
     name = uri
     if name.startswith("urn:barbican:"):
-        name = name[len("urn:barbican:"):]
+        name = name[len("urn:barbican:") :]
     return "schema-" + name.replace(":", "-").replace("/", "-")
 
 
@@ -49,7 +49,7 @@ def derive_title(uri: str) -> str:
         Display title, e.g. ``scm:git``.
     """
     if uri.startswith("urn:barbican:"):
-        return uri[len("urn:barbican:"):]
+        return uri[len("urn:barbican:") :]
     return uri
 
 
@@ -130,19 +130,13 @@ class SchemaRenderer:
         required_fields = schema.get("required", [])
         for name, prop_schema in schema.get("properties", {}).items():
             properties.append(
-                self._extract_property(
-                    name, prop_schema, name in required_fields, registry
-                )
+                self._extract_property(name, prop_schema, name in required_fields, registry)
             )
 
         pattern_properties = []
-        for pattern, prop_schema in schema.get(
-            "patternProperties", {}
-        ).items():
+        for pattern, prop_schema in schema.get("patternProperties", {}).items():
             pattern_properties.append(
-                self._extract_property(
-                    pattern, prop_schema, False, registry, is_pattern=True
-                )
+                self._extract_property(pattern, prop_schema, False, registry, is_pattern=True)
             )
 
         one_of = None
@@ -253,14 +247,12 @@ class SchemaRenderer:
             return "object"
         return str(schema_type)
 
-    def _resolve_ref_parts(
-        self, ref: str | None
-    ) -> tuple[str | None, str | None]:
+    def _resolve_ref_parts(self, ref: str | None) -> tuple[str | None, str | None]:
         """Split a ``$ref`` URI into base URI and display name.
 
         Parameters
         ----------
-        ref : str or None
+        ref : str | None
             The ``$ref`` value, possibly with a JSON pointer fragment.
 
         Returns
@@ -290,11 +282,7 @@ class SchemaRenderer:
         required = prop_schema.get("required", [])
         result = []
         for name, sub_schema in prop_schema["properties"].items():
-            result.append(
-                self._extract_property(
-                    name, sub_schema, name in required, registry
-                )
-            )
+            result.append(self._extract_property(name, sub_schema, name in required, registry))
         return result
 
     @staticmethod
