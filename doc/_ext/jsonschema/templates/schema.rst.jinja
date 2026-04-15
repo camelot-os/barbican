@@ -1,0 +1,84 @@
+{# SPDX-FileCopyrightText: 2026 H2Lab                                       #}
+{# SPDX-License-Identifier: Apache-2.0                                      #}
+{#                                                                           #}
+{# Jinja template: renders a single JSON Schema as RST documentation.        #}
+{# Context variables are provided by SchemaRenderer._build_context().        #}
+
+.. _{{ node_id }}:
+
+{{ title }}
+{{ underline }}
+
+{% if description %}
+{{ description }}
+
+{% endif %}
+{% if one_of %}
+.. note::
+
+   Exactly one of the following must be specified:
+
+{% for option in one_of %}
+   - {% for field in option.required %}``{{ field }}``{% if not loop.last %}, {% endif %}{% endfor %}
+{% endfor %}
+
+{% endif %}
+{% if properties %}
+.. list-table::
+   :header-rows: 1
+   :widths: 20 15 10 55
+
+   * - Name
+     - Type
+     - Required
+     - Description
+{% for prop in properties %}
+   * - ``{{ prop.name }}``
+     - {% if prop.ref %}:schema:`{{ prop.ref_display }} <{{ prop.ref_base }}>`{% else %}*{{ prop.type }}*{% endif %}
+
+     - {% if prop.required %}**Yes**{% else %}No{% endif %}
+
+     - {{ prop.description_line }}
+{% endfor %}
+
+{% endif %}
+{% if pattern_properties %}
+**Pattern properties:**
+
+{% for prop in pattern_properties %}
+- Pattern ``{{ prop.name }}``: {% if prop.ref %}:schema:`{{ prop.ref_display }} <{{ prop.ref_base }}>`{% else %}*{{ prop.type }}*{% endif %}{% if prop.description %} — {{ prop.description }}{% endif %}
+
+{% endfor %}
+
+{% endif %}
+{% for prop in properties if prop.nested_properties %}
+.. rubric:: ``{{ prop.name }}`` sub-properties
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 15 10 55
+
+   * - Name
+     - Type
+     - Required
+     - Description
+{% for sub in prop.nested_properties %}
+   * - ``{{ sub.name }}``
+     - {% if sub.ref %}:schema:`{{ sub.ref_display }} <{{ sub.ref_base }}>`{% else %}*{{ sub.type }}*{% endif %}
+
+     - {% if sub.required %}**Yes**{% else %}No{% endif %}
+
+     - {{ sub.description_line }}
+{% endfor %}
+
+{% endfor %}
+{% if dependent_required %}
+.. note::
+
+   **Dependent fields:**
+
+{% for field, deps in dependent_required.items() %}
+   - If ``{{ field }}`` is specified, {% for d in deps %}``{{ d }}``{% if not loop.last %} and {% endif %}{% endfor %} must also be provided.
+{% endfor %}
+
+{% endif %}
