@@ -31,6 +31,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "autoapi.extension",
     "sphinxarg.ext",
+    "jsonschemadoc",
     "singlehtml_refuri_fix",
 ]
 
