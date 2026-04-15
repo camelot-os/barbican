@@ -33,7 +33,7 @@ class SchemaXRefRole(XRefRole):
     def process_link(
         self,
         env: BuildEnvironment,
-        refnode: pending_xref,
+        refnode: nodes.Element,
         has_explicit_title: bool,
         title: str,
         target: str,
@@ -44,7 +44,7 @@ class SchemaXRefRole(XRefRole):
         ----------
         env : BuildEnvironment
             The Sphinx build environment.
-        refnode : pending_xref
+        refnode : nodes.Element
             The pending cross-reference node being constructed.
         has_explicit_title : bool
             Whether the user provided an explicit display title.
@@ -64,7 +64,7 @@ class SchemaXRefRole(XRefRole):
         if not has_explicit_title:
             # Derive a short display title from the URN
             if target.startswith("urn:barbican:"):
-                title = target[len("urn:barbican:"):]
+                title = target[len("urn:barbican:") :]
             else:
                 title = target
         return title, target
@@ -93,7 +93,7 @@ def resolve_schema_xref(
 
     Returns
     -------
-    nodes.reference or None
+    nodes.reference | None
         A resolved reference node, or ``None`` if not a schema xref.
     """
     if node.get("reftype") != "schema":

@@ -58,16 +58,14 @@ def setup(app: Sphinx) -> dict[str, typing.Any]:
 
     Returns
     -------
-    dict[str, Any]
+    dict[str, typing.Any]
         Extension metadata.
     """
     from .directives import SchemaTocDirective
     from .documenter import SchemaDocumenter
     from .roles import SchemaXRefRole, resolve_schema_xref
 
-    app.add_config_value(
-        "jsonschema_registry_module", "camelot.barbican.config", "env"
-    )
+    app.add_config_value("jsonschema_registry_module", "camelot.barbican.config", "env")
     app.add_config_value("jsonschema_registry_attr", "REGISTRY", "env")
 
     app.add_autodocumenter(SchemaDocumenter)
@@ -85,14 +83,10 @@ def setup(app: Sphinx) -> dict[str, typing.Any]:
     }
 
 
-def _purge_schema_targets(
-    app: Sphinx, env: BuildEnvironment, docname: str
-) -> None:
+def _purge_schema_targets(app: Sphinx, env: BuildEnvironment, docname: str) -> None:
     """Remove targets belonging to a purged document."""
     targets = get_schema_targets(env)
-    to_remove = [
-        uri for uri, (doc, _, _) in targets.items() if doc == docname
-    ]
+    to_remove = [uri for uri, (doc, _, _) in targets.items() if doc == docname]
     for uri in to_remove:
         del targets[uri]
 

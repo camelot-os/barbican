@@ -20,7 +20,7 @@ from sphinx.util import logging
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.nodes import nested_parse_with_titles
 
-from .renderer import derive_title, discover_schema_uris, uri_to_node_id
+from .renderer import derive_title, discover_schema_uris
 
 if typing.TYPE_CHECKING:
     pass
@@ -91,7 +91,6 @@ class SchemaTocDirective(SphinxDirective):
         rst_lines: list[str] = []
         for uri in uris:
             title = derive_title(uri)
-            node_id = uri_to_node_id(uri)
 
             description = ""
             if registry is not None:
