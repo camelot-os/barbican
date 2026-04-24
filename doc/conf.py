@@ -7,8 +7,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "_ext"))
 
 # General information about the project.
 project = "camelot.barbican"
-copyright = "2024, Ledger SAS"
-author = "Ledger"
+copyright = "2026, H2Lab"
+author = "H2Lab"
 
 # XXX:
 # Project base on PEP440 and setuptools_scm dynamic versioning
