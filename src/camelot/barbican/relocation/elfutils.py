@@ -37,11 +37,11 @@ class Elf:
 
     def save(self) -> None:
         # XXX: FIXME
-        logger.info(f"Wrinting {self.name} to {self._output_path}")
+        logger.info(f"Writing {self.name} to {self._output_path}")
         self._elf.write(self._output_path)  # type: ignore
 
     @property
-    def is_an_camelot_application(self) -> bool:
+    def is_a_camelot_application(self) -> bool:
         if self._package_metadata is not None:
             return self._package_metadata["type"] == "camelot application"
         return False
@@ -141,7 +141,7 @@ class AppElf(Elf):
 
     def __init__(self, elf: str, out: str | None) -> None:
         super().__init__(elf, out)
-        if not self.is_an_camelot_application:
+        if not self.is_a_camelot_application:
             console.critical(f"{self.name} is not a valid camelot application")
             raise ValueError
 
