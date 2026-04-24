@@ -8,13 +8,14 @@ import json
 import codecs
 
 import typing
+from typing import ClassVar
 
 from ..logger import logger
 from ..console import console
 
 
 class Elf:
-    SECTION_HEADER_SIZE = 16
+    SECTION_HEADER_SIZE: ClassVar[int] = 16
 
     def __init__(self, elf: str, out: typing.Optional[str]) -> None:
         self._name: str = os.path.basename(elf)
@@ -77,10 +78,23 @@ class Elf:
 
 
 class SentryElf(Elf):
-    FLASH_SECTIONS = [".isr_vector", ".task_list", ".text", ".ARM"]
-    RAM_SECTIONS = [".bss", "._stack"]
+    """Camelot Sentry kernel Elf representation.
 
-    def __init__(self, elf: str, out: typing.Optional[str]) -> None:
+    .. todo::
+        Raise if not sentry kernel elf
+
+    Parameters
+    ----------
+    elf: str
+        Input elf file to parse
+    out: str | None
+        Path to written elf file while write method is called
+    """
+
+    FLASH_SECTIONS: ClassVar[list[str]] = [".isr_vector", ".task_list", ".text", ".ARM"]
+    RAM_SECTIONS: ClassVar[list[str]] = [".bss", "._stack"]
+
+    def __init__(self, elf: str, out: str | None) -> None:
         super().__init__(elf, out)
 
     def patch_task_list(self, task_meta_table: bytearray) -> None:
@@ -109,11 +123,6 @@ class SentryElf(Elf):
 class AppElf(Elf):
     """Camelot application Elf representation.
 
-    Attributes
-    ----------
-    FLASH_SECTIONS: list[str]
-    RAM_SECTIONS: list[str]
-
     Parameters
     ----------
     elf: str
@@ -127,9 +136,8 @@ class AppElf(Elf):
         Package metadata 'type' is not 'camelot application'
     """
 
-    # Section to relocate
-    FLASH_SECTIONS: list[str] = [".text", ".ARM"]
-    RAM_SECTIONS: list[str] = [".svcexchange", ".got", ".data", ".bss"]
+    FLASH_SECTIONS: ClassVar[list[str]] = [".text", ".ARM"]
+    RAM_SECTIONS: ClassVar[list[str]] = [".svcexchange", ".got", ".data", ".bss"]
 
     def __init__(self, elf: str, out: str | None) -> None:
         super().__init__(elf, out)
