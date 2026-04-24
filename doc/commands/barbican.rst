@@ -1,7 +1,7 @@
 Command line tool
-==========================
+=================
 
 .. argparse::
    :module: camelot.barbican.barbican
-   :func: main_argument_parser
+   :func: parser
    :prog: barbican

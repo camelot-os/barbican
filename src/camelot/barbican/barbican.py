@@ -67,17 +67,22 @@ class CommandLineArguments:
         add_arguments(cmd_parser)
         cmd_parser.set_defaults(func=run_cmd)
 
-    def run(self) -> None:
-        args = self.parser.parse_args()
-        if args.verbose:
-            log_config.set_console_log_level(logging.DEBUG)
-        elif args.quiet:
-            log_config.set_console_log_level(logging.ERROR)
-        else:
-            lvl = logging.getLevelName(args.log_level.upper())
-            log_config.set_console_log_level(lvl)
 
-        args.func(args)
+def parser() -> ArgumentParser:
+    return CommandLineArguments().parser
+
+
+def run() -> None:
+    args = parser().parse_args()
+    if args.verbose:
+        log_config.set_console_log_level(logging.DEBUG)
+    elif args.quiet:
+        log_config.set_console_log_level(logging.ERROR)
+    else:
+        lvl = logging.getLevelName(args.log_level.upper())
+        log_config.set_console_log_level(lvl)
+
+    args.func(args)
 
 
 def run_internal_command(cmd: str, argv: list[str]) -> None:
@@ -116,7 +121,7 @@ def main() -> None:
                 raise ValueError("missing internal command")
             run_internal_command(sys.argv[2], sys.argv[3:])
         else:
-            CommandLineArguments().run()
+            run()
 
     except Exception as e:
         logger.critical(str(e))
