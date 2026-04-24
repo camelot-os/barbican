@@ -44,7 +44,7 @@ Rust environment
 
 One may use `rustup <https://www.rust-lang.org/tools/install>`_ for rust environment setup.
 The following targets are supported and might be installed:
- - thumbv7em-none-eabi
- - thumbv8m.main-none-eabi
+* thumbv7em-none-eabi/hf
+* thumbv8m.main-none-eabi/hf
 
 The minimum required version is 1.82
