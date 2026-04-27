@@ -14,7 +14,7 @@ from .logger import logger, log_config
 
 class CommandLineArguments:
     def __init__(self) -> None:
-        from . import cmd_download, cmd_setup, cmd_update, cmd_dumpspecs
+        from . import cmd_download, cmd_setup, cmd_update, cmd_dumpspecs, cmd_sdk
 
         self.parser = ArgumentParser(prog="barbican", add_help=True)
         self.subparsers = self.parser.add_subparsers(
@@ -38,6 +38,7 @@ class CommandLineArguments:
         self.add_command(
             "dumpspecs", cmd_dumpspecs.add_arguments, cmd_dumpspecs.run, "dump project specs"
         )
+        self.add_command("sdk", cmd_sdk.add_arguments, cmd_sdk.run, "sdk setup/packaging/handling")
 
     def _log_level_arguments(self) -> ArgumentParser:
         parser = ArgumentParser(add_help=False)
