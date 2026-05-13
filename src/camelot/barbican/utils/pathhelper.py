@@ -54,13 +54,17 @@ def default_prefix() -> Path:
         return Path("/usr/local")
 
 
+def default_config() -> Path:
+    return Path("project.toml")
+
+
 @dataclass(kw_only=True, frozen=True)
 class ProjectPath:
     project_dir: Path
     output_dir: Path
     prefix: Path = field(default_factory=default_prefix)
     # config_filename is `project.toml` by default but can be `sdk.toml` for instance
-    config_filename: str = "project.toml"
+    config_filename: Path = field(default_factory=default_config)
 
     # ClassVar annotation is used by dataclass decorator in order to exclude member
     # from consideration as a field and to be ignored by the dataclass mechanisms.
