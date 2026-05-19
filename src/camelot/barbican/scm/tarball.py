@@ -14,6 +14,7 @@ from rich.progress import (
 
 import tarfile
 import hashlib
+import stat
 
 from ..logger import logger
 from ..console import console
@@ -70,22 +71,35 @@ class Tarball(ScmBaseClass):
         with progress:
             task_id = progress.add_task("extracting", start=False, filename=self._tarball.name)
             with tarfile.open(self._tarball, "r") as f:
-                members = f.getmembers()
-                progress.update(task_id, total=len(members))
+                nr_members: int = 0
+
+                for member in f.getmembers():
+                    member.name = str(self._strip_member_path(Path(member.name), self._strip))
+                    nr_members = nr_members + 1
+
+                    if member.islnk():
+                        member.linkname = str(
+                            self._strip_member_path(Path(member.linkname), self._strip)
+                        )
+                    elif member.isdir() and member.mode & stat.S_IWUSR == 0:
+                        # members number is used for progress bar total element.
+                        # If a dir is readonly, it will be create with `r/w` permission, all
+                        # components will be extracted and then permission is changed to `ro`.
+                        # Thus, progress callback will be call twice for this member.
+                        nr_members = nr_members + 1
+
+                progress.update(task_id, total=nr_members)
                 progress.start_task(task_id)
-                for m in members:
-                    orig = m.name
-                    m.name = str(self._strip_member_path(Path(m.name), self._strip))
-                    dest = str(self.sourcedir / m.name)
-                    logger.debug(f" {orig} -> {dest}")
 
-                    # if member is a hardlink, target link path is relative to archive root dir
-                    # and need to be stripped too
-                    if m.islnk():
-                        m.linkname = str(self._strip_member_path(Path(m.linkname), self._strip))
-
-                    f.extract(m, self.sourcedir)
+                def _progress_filter(member: tarfile.TarInfo, path: str) -> tarfile.TarInfo | None:
+                    logger.debug(f" Extracting {member.name}")
                     progress.update(task_id, advance=1)
+
+                    return member
+
+                # As tarfile might be readonly, one should use extractall which handles
+                # directories permission properly.
+                f.extractall(path=self.sourcedir, filter=_progress_filter)
 
     def _download_files(self) -> None:
         self._tarball = download_file(self._url, self._dl_dir)
