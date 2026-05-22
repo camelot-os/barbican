@@ -14,7 +14,6 @@ from rich.progress import (
 
 import tarfile
 import hashlib
-import stat
 
 from ..logger import logger
 from ..console import console
@@ -81,11 +80,11 @@ class Tarball(ScmBaseClass):
                         member.linkname = str(
                             self._strip_member_path(Path(member.linkname), self._strip)
                         )
-                    elif member.isdir() and member.mode & stat.S_IWUSR == 0:
+                    elif member.isdir():
                         # members number is used for progress bar total element.
-                        # If a dir is readonly, it will be create with `r/w` permission, all
-                        # components will be extracted and then permission is changed to `ro`.
-                        # Thus, progress callback will be call twice for this member.
+                        # Progress callback is called twice for each directory member.
+                        # Once w/ r/w permission, and once with effective permission at the end
+                        # of archive extraction.
                         nr_members = nr_members + 1
 
                 progress.update(task_id, total=nr_members)
@@ -97,8 +96,6 @@ class Tarball(ScmBaseClass):
 
                     return member
 
-                # As tarfile might be readonly, one should use extractall which handles
-                # directories permission properly.
                 f.extractall(path=self.sourcedir, filter=_progress_filter)
 
     def _download_files(self) -> None:
