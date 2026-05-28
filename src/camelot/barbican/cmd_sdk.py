@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .config.validator import validate_sdk_config
 from .console import console
+from .rust import Rustup
 from .utils import pathhelper
 from .scm import scm_create
 
@@ -27,6 +28,7 @@ class SdkBuilder:
         self._gcc = scm_create(
             "", self.path.dl_dir, self.path.host_dir, self._toml["compiler"]["gcc"]
         )
+        self._rustup = Rustup(self._toml["compiler"]["rustc"], self.path.host_dir)
 
     def build(self) -> None:
         console.title(f"Barbican SDK {self._toml['name']}")
@@ -35,6 +37,7 @@ class SdkBuilder:
         self.path.save()
 
         self._gcc.download()
+        self._rustup.install(self.path.dl_dir)
 
 
 def add_arguments(parser: ArgumentParser) -> None: ...
