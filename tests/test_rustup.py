@@ -4,11 +4,18 @@
 
 """Tests for the camelot.barbican.rust.Rustup class."""
 
+import pytest
+import sys
+
 from pathlib import Path
 
-import pytest
-
 from camelot.barbican.rust import Rustup
+
+
+pytestmark = pytest.mark.skipif(
+    sys.platform == "win32", reason="Rustup-init installer does not work for windows platform"
+)
+
 
 _VALID_CONFIG: dict = {
     "version": "1.85.0",
