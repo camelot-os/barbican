@@ -53,7 +53,7 @@ def run_gen_task_metadata_bin(input: Path, output: Path, path: ProjectPath) -> N
     for entry in ["heap_size", "stack_size", "label", "magic"]:
         task_metadata[entry] = int(task_metadata[entry], base=16)
 
-    for entry in ["priority", "quantum"]:
+    for entry in ["priority", "quantum", "domain"]:
         task_metadata[entry] = int(task_metadata[entry], base=10)
 
     task_metadata["s_text"], text_size = elf.get_section_info(".text")
@@ -67,7 +67,6 @@ def run_gen_task_metadata_bin(input: Path, output: Path, path: ProjectPath) -> N
 
     task_metadata["entrypoint_offset"] = elf.get_symbol_offset_from_section("_start", ".text")
     # TODO
-    task_metadata["domain"] = 0
     task_metadata["rodata_size"] = 0
     # task_metadata["finalize_offset"] = elf.get_symbol_offset_from_section("_exit", ".text")
     task_metadata["finalize_offset"] = 0
